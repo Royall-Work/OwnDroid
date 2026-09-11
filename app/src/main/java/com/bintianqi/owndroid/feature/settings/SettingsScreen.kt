@@ -179,10 +179,14 @@ fun SettingsOptionsScreen(
 ) {
     val dangerousFeatures by vm.dangerousFeaturesState.collectAsState()
     val shortcuts by vm.shortcutsState.collectAsState()
+    val hiddenFeatures by vm.hiddenFeaturesState.collectAsState()
     MyScaffold(R.string.options, onNavigateUp, 0.dp) {
         SwitchItem(
             R.string.show_dangerous_features, dangerousFeatures, vm::setDisplayDangerousFeatures,
             R.drawable.warning_fill0
+        )
+        SwitchItem(
+            R.string.show_hidden_features_by_royall, hiddenFeatures, vm::setShowHiddenFeatures
         )
         SwitchItem(
             R.string.shortcuts, shortcuts, vm::setShortcutsEnabled, R.drawable.open_in_new
