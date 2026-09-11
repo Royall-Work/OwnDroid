@@ -118,7 +118,7 @@ fun String.hash(): String {
     return md.digest(this.encodeToByteArray()).toHexString()
 }
 
-val MyAdminComponent = ComponentName.unflattenFromString("com.royall.owndroid/.Receiver")!!
+val MyAdminComponent = ComponentName("com.royall.owndroid", "com.bintianqi.owndroid.Receiver")
 
 
 @OptIn(ExperimentalStdlibApi::class)
