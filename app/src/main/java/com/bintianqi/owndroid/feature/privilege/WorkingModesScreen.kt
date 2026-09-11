@@ -119,9 +119,7 @@ fun WorkModesScreen(
                                     dialog = 4
                                 },
                                 enabled = false,
-                                leadingIcon = {
-                                    Icon(Icons.Default.Close, null)
-                                }
+                                leadingIcon = { Icon(Icons.Default.Close, null) }
                             )
                             if (!privilege.dhizuku && VERSION.SDK_INT >= 28) DropdownMenuItem(
                                 { Text(stringResource(R.string.transfer_ownership)) },
@@ -130,9 +128,7 @@ fun WorkModesScreen(
                                     onNavigate(Destination.TransferOwnership)
                                 },
                                 leadingIcon = {
-                                    Icon(
-                                        painterResource(R.drawable.swap_horiz_fill0), null
-                                    )
+                                    Icon(painterResource(R.drawable.swap_horiz_fill0), null)
                                 }
                             )
                         }
@@ -263,9 +259,7 @@ fun WorkModesScreen(
         if (dialog == 2) CircularProgressDialog { }
         if (dialog == 3) AlertDialog(
             title = {
-                Text(
-                    stringResource(if (operationSucceed) R.string.succeeded else R.string.failed)
-                )
+                Text(stringResource(if (operationSucceed) R.string.succeeded else R.string.failed))
             },
             text = {
                 Column(
