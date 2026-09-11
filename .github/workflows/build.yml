@@ -34,13 +34,7 @@ jobs:
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build APK (testkey)
-        run: ./gradlew build
-
-      - name: Upload Debug APK (testkey)
-        uses: actions/upload-artifact@v6
-        with:
-          name: OwnDroid-CI-${{ env.SHORT_SHA }}-debug-testkey
-          path: app/build/outputs/apk/debug/app-debug.apk
+        run: ./gradlew assembleRelease
 
       - name: Upload Release APK (testkey)
         uses: actions/upload-artifact@v6
