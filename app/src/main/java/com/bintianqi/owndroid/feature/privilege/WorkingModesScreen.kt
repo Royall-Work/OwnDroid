@@ -118,7 +118,10 @@ fun WorkModesScreen(
                                     expanded = false
                                     dialog = 4
                                 },
-                                leadingIcon = { Icon(Icons.Default.Close, null) }
+                                enabled = false,
+                                leadingIcon = {
+                                    Icon(Icons.Default.Close, null)
+                                }
                             )
                             if (!privilege.dhizuku && VERSION.SDK_INT >= 28) DropdownMenuItem(
                                 { Text(stringResource(R.string.transfer_ownership)) },
