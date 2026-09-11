@@ -67,12 +67,13 @@ fun FunctionItem(
     @StringRes title: Int,
     desc: String? = null,
     @DrawableRes icon: Int? = null,
+    enabled: Boolean = true,
     operation: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = operation)
+            .clickable(enabled = enabled, onClick = operation)
             .padding(start = 25.dp, end = 15.dp)
             .padding(vertical = 12.dp + (if (desc != "") 0 else 3).dp),
         verticalAlignment = Alignment.CenterVertically
