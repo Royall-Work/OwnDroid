@@ -101,7 +101,7 @@ fun retrieveNetworkLogs(app: MyApplication, token: Long) {
 }
 
 val activateOrgProfileCommand = "dpm mark-profile-owner-on-organization-owned-device --user " +
-        "${Binder.getCallingUid() / 100000} com.bintianqi.owndroid/com.bintianqi.owndroid.Receiver"
+        "${Binder.getCallingUid() / 100000} com.royall.owndroid/com.bintianqi.owndroid.Receiver"
 
 @RequiresApi(24)
 fun retrieveSecurityLogs(app: MyApplication) {
@@ -201,7 +201,7 @@ fun doUserOperationWithContext(
     }
 }
 
-const val ACTIVATE_DEVICE_OWNER_COMMAND = "dpm set-device-owner com.bintianqi.owndroid/.Receiver"
+const val ACTIVATE_DEVICE_OWNER_COMMAND = "dpm set-device-owner com.royall.owndroid/com.bintianqi.owndroid.Receiver"
 
 class PrivilegeStatus(
     val device: Boolean = false,
