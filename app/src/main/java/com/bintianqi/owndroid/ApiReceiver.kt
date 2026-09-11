@@ -21,7 +21,7 @@ class ApiReceiver : BroadcastReceiver() {
             try {
                 myApp.container.privilegeHelper.safeDpmCall {
                     @SuppressWarnings("NewApi")
-                    when (intent.action?.removePrefix("com.bintianqi.owndroid.action.")) {
+                    when (intent.action?.removePrefix("com.royall.owndroid.action.")) {
                         "HIDE" -> dpm.setApplicationHidden(dar, app, true)
                         "UNHIDE" -> dpm.setApplicationHidden(dar, app, false)
                         "SUSPEND" -> dpm.setPackagesSuspended(dar, arrayOf(app), true)
