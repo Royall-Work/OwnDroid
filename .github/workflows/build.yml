@@ -18,8 +18,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      actions: write
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -36,8 +35,12 @@ jobs:
       - name: Build APK (testkey)
         run: ./gradlew assembleRelease
 
-      - name: Upload Release APK (testkey)
-        uses: actions/upload-artifact@v6
-        with:
-          name: OwnDroid-CI-${{ env.SHORT_SHA }}-release-testkey
-          path: app/build/outputs/apk/release/app-release.apk
+      - name: Publish APK to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "ci-${GITHUB_SHA}" \
+            app/build/outputs/apk/release/app-release.apk \
+            --target "$GITHUB_SHA" \
+            --title "OwnDroid CI ${SHORT_SHA}" \
+            --notes "Testkey APK built from commit ${GITHUB_SHA}."
