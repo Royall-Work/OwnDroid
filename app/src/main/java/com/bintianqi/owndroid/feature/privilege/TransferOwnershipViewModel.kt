@@ -37,7 +37,7 @@ class TransferOwnershipViewModel(
                     null
                 }
             }.filter {
-                it.isVisible && it.packageName != "com.bintianqi.owndroid" &&
+                it.isVisible && it.packageName != "com.royall.owndroid" &&
                         it.activityInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0
             }.map {
                 DeviceAdmin(getAppInfo(pm, it.packageName), it.component)
