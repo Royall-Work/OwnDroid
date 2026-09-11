@@ -151,6 +151,7 @@ fun DeleteWorkProfileScreen(
     var flags by remember { mutableIntStateOf(0) }
     var warning by remember { mutableStateOf(false) }
     var reason by remember { mutableStateOf("") }
+    var confirmation by remember { mutableStateOf("") }
     MyScaffold(R.string.delete_work_profile, onNavigateUp) {
         CheckBoxItem(R.string.wipe_external_storage, flags and WIPE_EXTERNAL_STORAGE != 0) {
             flags = flags xor WIPE_EXTERNAL_STORAGE
@@ -173,6 +174,7 @@ fun DeleteWorkProfileScreen(
         Spacer(Modifier.padding(vertical = 5.dp))
         Button(
             {
+                confirmation = ""
                 warning = true
             },
             Modifier.fillMaxWidth(),
@@ -189,7 +191,13 @@ fun DeleteWorkProfileScreen(
                 Text(stringResource(R.string.warning))
             },
             text = {
-                Text(stringResource(R.string.wipe_work_profile_warning))
+                OutlinedTextField(
+                    confirmation,
+                    { confirmation = it },
+                    Modifier.fillMaxWidth(),
+                    label = { Text("Enter DELETE to continue") },
+                    placeholder = { Text("DELETE") }
+                )
             },
             onDismissRequest = { warning = false },
             confirmButton = {
@@ -205,7 +213,7 @@ fun DeleteWorkProfileScreen(
                     {
                         vm.deleteProfile(flags, reason)
                     },
-                    enabled = timer == 0,
+                    enabled = timer == 0 && confirmation == "DELETE",
                     colors = ButtonDefaults.textButtonColors(contentColor = colorScheme.error)
                 ) {
                     Text(stringResource(R.string.confirm) + timerText)
