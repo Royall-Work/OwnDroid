@@ -164,13 +164,16 @@ fun DeleteWorkProfileScreen(
                 Text(stringResource(R.string.warning))
             },
             text = {
-                OutlinedTextField(
-                    confirmation,
-                    { confirmation = it },
-                    Modifier.fillMaxWidth(),
-                    label = { Text("Enter DELETE to continue") },
-                    placeholder = { Text("DELETE") }
-                )
+                androidx.compose.foundation.layout.Column {
+                    Text(stringResource(R.string.wipe_work_profile_warning))
+                    OutlinedTextField(
+                        confirmation,
+                        { confirmation = it },
+                        Modifier.fillMaxWidth(),
+                        label = { Text("Enter DELETE to continue") },
+                        placeholder = { Text("DELETE") }
+                    )
+                }
             },
             onDismissRequest = { warning = false },
             confirmButton = {
