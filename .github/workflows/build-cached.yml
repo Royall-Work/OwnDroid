@@ -1,0 +1,47 @@
+name: Cached Release Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "dev" ]
+    paths-ignore:
+      - '**.md'
+    tags-ignore:
+      - '**'
+
+concurrency:
+  group: "cached-build"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Get short commit SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Build APK (testkey)
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: OwnDroid-CI-${{ env.SHORT_SHA }}-release-testkey
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
