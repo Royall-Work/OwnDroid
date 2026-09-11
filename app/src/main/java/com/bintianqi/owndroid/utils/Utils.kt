@@ -118,7 +118,7 @@ fun String.hash(): String {
     return md.digest(this.encodeToByteArray()).toHexString()
 }
 
-val MyAdminComponent = ComponentName.unflattenFromString("com.bintianqi.owndroid/.Receiver")!!
+val MyAdminComponent = ComponentName.unflattenFromString("com.royall.owndroid/com.bintianqi.owndroid.Receiver")!!
 
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -231,7 +231,7 @@ fun uninstallPackage(
     application: MyApplication, privilegeHelper: PrivilegeHelper,
     packageName: String, onComplete: (String?) -> Unit
 ) {
-    val action = "com.bintianqi.owndroid.action.PACKAGE_UNINSTALLED"
+    val action = "com.royall.owndroid.action.PACKAGE_UNINSTALLED"
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val statusExtra = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, 999)
