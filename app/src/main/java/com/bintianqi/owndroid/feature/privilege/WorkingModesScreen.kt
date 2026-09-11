@@ -118,6 +118,7 @@ fun WorkModesScreen(
                                     expanded = false
                                     dialog = 4
                                 },
+                                enabled = false,
                                 leadingIcon = { Icon(Icons.Default.Close, null) }
                             )
                             if (!privilege.dhizuku && VERSION.SDK_INT >= 28) DropdownMenuItem(
