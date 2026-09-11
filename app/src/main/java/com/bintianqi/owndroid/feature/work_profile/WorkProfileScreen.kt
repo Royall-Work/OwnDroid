@@ -56,6 +56,11 @@ fun WorkProfileScreen(
         FunctionItem(R.string.intent_filter, icon = R.drawable.filter_alt_fill0) {
             onNavigate(Destination.CrossProfileIntentFilter)
         }
+        /*
+        FunctionItem(R.string.delete_work_profile, icon = R.drawable.delete_forever_fill0) {
+            onNavigate(Destination.DeleteWorkProfile)
+        }
+        */
     }
 }
 
