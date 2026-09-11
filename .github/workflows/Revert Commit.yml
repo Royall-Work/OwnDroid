@@ -1,0 +1,69 @@
+name: Revert Commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: "Commit hash to revert"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  revert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Get Commit Info
+        id: commit
+        run: |
+          HASH="${{ inputs.commit_hash }}"
+
+          git rev-parse "$HASH" >/dev/null
+
+          TITLE=$(git log -1 --format=%s "$HASH")
+          SHORT=$(git rev-parse --short "$HASH")
+
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "short=$SHORT" >> "$GITHUB_OUTPUT"
+
+      - name: Create Branch
+        run: |
+          git checkout -b "revert-${{ steps.commit.outputs.short }}"
+
+      - name: Revert Commit
+        run: |
+          git revert --no-edit "${{ inputs.commit_hash }}"
+
+      - name: Push Branch
+        run: |
+          git push origin "revert-${{ steps.commit.outputs.short }}"
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base "${{ github.ref_name }}" \
+            --head "revert-${{ steps.commit.outputs.short }}" \
+            --title "Revert: ${{ steps.commit.outputs.title }}" \
+            --body "This PR reverts commit:
+
+          ${{ inputs.commit_hash }}
+
+          Original commit:
+          ${{ steps.commit.outputs.title }}"
