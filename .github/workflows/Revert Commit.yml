@@ -47,7 +47,7 @@ jobs:
 
       - name: Revert Commit
         run: |
-          git revert --no-edit "${{ inputs.commit_hash }}"
+          git revert --no-edit -X theirs "${{ inputs.commit_hash }}"
 
       - name: Push Branch
         run: |
