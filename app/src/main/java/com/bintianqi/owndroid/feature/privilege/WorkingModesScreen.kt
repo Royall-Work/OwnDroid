@@ -80,7 +80,7 @@ fun WorkModesScreen(
     LaunchedEffect(privilege) {
         if (!params.canNavigateUp && privilege.device) {
             delay(1000)
-            if (dialog != 3) { // Activated by ADB command
+            if (dialog != 3) {
                 operationSucceed = true
                 resultText = ""
                 dialog = 3
@@ -128,9 +128,7 @@ fun WorkModesScreen(
                                     onNavigate(Destination.TransferOwnership)
                                 },
                                 leadingIcon = {
-                                    Icon(
-                                        painterResource(R.drawable.swap_horiz_fill0), null
-                                    )
+                                    Icon(painterResource(R.drawable.swap_horiz_fill0), null)
                                 }
                             )
                         }
@@ -169,12 +167,8 @@ fun WorkModesScreen(
                     }
                 }
             }
-            if (
-                privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())
-            ) {
-                WorkingModeItem(R.string.work_profile, privilege.work) {
-                    if (!privilege.work) onNavigate(Destination.CreateWorkProfile)
-                }
+            if (privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())) {
+                WorkingModeItem(R.string.work_profile, privilege.work, enabled = false) { }
             }
             if (privilege.work) {
                 WorkingModeItem(R.string.org_owned_work_profile, privilege.org) {
@@ -261,9 +255,7 @@ fun WorkModesScreen(
         if (dialog == 2) CircularProgressDialog { }
         if (dialog == 3) AlertDialog(
             title = {
-                Text(
-                    stringResource(if (operationSucceed) R.string.succeeded else R.string.failed)
-                )
+                Text(stringResource(if (operationSucceed) R.string.succeeded else R.string.failed))
             },
             text = {
                 Column(
@@ -360,13 +352,16 @@ fun WorkModesScreen(
 }
 
 @Composable
-private fun WorkingModeItem(text: Int, active: Boolean, onClick: () -> Unit) {
+private fun WorkingModeItem(
+    text: Int, active: Boolean, enabled: Boolean = true, onClick: () -> Unit
+) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .background(if (active) colorScheme.primaryContainer else Color.Transparent)
-            .padding(HorizontalPadding, 10.dp),
+            .padding(HorizontalPadding, 10.dp)
+            .alpha(if (enabled) 1F else 0.5F),
         Arrangement.SpaceBetween, Alignment.CenterVertically
     ) {
         Text(stringResource(text), style = typography.titleLarge)
