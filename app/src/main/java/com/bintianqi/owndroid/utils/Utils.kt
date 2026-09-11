@@ -1,4 +1,4 @@
-package com.bintianqi.owndroid
+package com.bintianqi.owndroid.utils
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -120,6 +120,7 @@ fun String.hash(): String {
 
 val MyAdminComponent = ComponentName.unflattenFromString("com.royall.owndroid/.Receiver")!!
 
+
 @OptIn(ExperimentalStdlibApi::class)
 fun getPackageSignature(info: PackageInfo): String? {
     val signatures = if (VERSION.SDK_INT >= 28) info.signingInfo?.apkContentsSigners else info.signatures
@@ -188,8 +189,43 @@ val getInstalledAppsFlags =
 fun searchInString(query: String, content: String)
         = query.split(' ').all { content.contains(it, true) }
 
-val String.isValidPackageName
-    get() = Regex("""^(?:[a-zA-Z]\w*\.)+[a-zA-Z]\w*$""").matches(this)
+class ToastChannel(val context: Context) {
+    val channel = Channel<String>(0, BufferOverflow.DROP_LATEST)
+    fun sendStatus(status: Boolean) {
+        val resId = if (status) R.string.success else R.string.failed
+        channel.trySend(context.getString(resId))
+    }
+    fun sendText(text: String) {
+        channel.trySend(text)
+    }
+    fun sendText(resId: Int) {
+        channel.trySend(context.getString(resId))
+    }
+}
+
+class AppInfo(
+    val name: String,
+    val label: String,
+    val icon: Drawable,
+    val flags: Int
+) {
+    val isSystem get() = (flags and ApplicationInfo.FLAG_SYSTEM) != 0
+}
+
+fun getAppInfo(pm: PackageManager, info: ApplicationInfo) =
+    AppInfo(info.packageName, info.loadLabel(pm).toString(), info.loadIcon(pm), info.flags)
+
+fun getAppInfo(pm: PackageManager, name: String): AppInfo {
+    return try {
+        getAppInfo(pm, pm.getApplicationInfo(name, getInstalledAppsFlags))
+    } catch (_: PackageManager.NameNotFoundException) {
+        AppInfo(name, "???", Color.Transparent.toArgb().toDrawable(), 0)
+    }
+}
+
+fun <T>List<T>.plusOrMinus(state: Boolean, item: T) = if (state) plus(item) else minus(item)
+fun <T>List<T>.plusOrMinus(state: Boolean, items: Collection<T>) =
+    if (state) plus(items) else minus(items)
 
 fun uninstallPackage(
     application: MyApplication, privilegeHelper: PrivilegeHelper,
@@ -230,13 +266,12 @@ fun uninstallPackage(
     application.getPackageInstaller(privilegeHelper.dhizuku).uninstall(packageName, pi)
 }
 
-fun <T>List<T>.plusOrMinus(state: Boolean, item: T) = if (state) plus(item) else minus(item)
-fun <T>List<T>.plusOrMinus(state: Boolean, items: Collection<T>) =
-    if (state) plus(items) else minus(items)
-
 fun viewModelFactory(build: () -> ViewModel) =
     object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return build() as T
         }
     }
+
+val String.isValidPackageName
+    get() = Regex("""^(?:[a-zA-Z]\w*\.)+[a-zA-Z]\w*$""").matches(this)
