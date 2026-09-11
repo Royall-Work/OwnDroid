@@ -80,7 +80,7 @@ fun WorkModesScreen(
     LaunchedEffect(privilege) {
         if (!params.canNavigateUp && privilege.device) {
             delay(1000)
-            if (dialog != 3) {
+            if (dialog != 3) { // Activated by ADB command
                 operationSucceed = true
                 resultText = ""
                 dialog = 3
@@ -118,8 +118,9 @@ fun WorkModesScreen(
                                     expanded = false
                                     dialog = 4
                                 },
-                                enabled = false,
-                                leadingIcon = { Icon(Icons.Default.Close, null) }
+                                leadingIcon = {
+                                    Icon(Icons.Default.Close, null)
+                                }
                             )
                             if (!privilege.dhizuku && VERSION.SDK_INT >= 28) DropdownMenuItem(
                                 { Text(stringResource(R.string.transfer_ownership)) },
@@ -128,7 +129,9 @@ fun WorkModesScreen(
                                     onNavigate(Destination.TransferOwnership)
                                 },
                                 leadingIcon = {
-                                    Icon(painterResource(R.drawable.swap_horiz_fill0), null)
+                                    Icon(
+                                        painterResource(R.drawable.swap_horiz_fill0), null
+                                    )
                                 }
                             )
                         }
@@ -167,8 +170,12 @@ fun WorkModesScreen(
                     }
                 }
             }
-            if (privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())) {
-                WorkingModeItem(R.string.work_profile, privilege.work, enabled = false) { }
+            if (
+                privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())
+            ) {
+                WorkingModeItem(R.string.work_profile, privilege.work) {
+                    if (!privilege.work) onNavigate(Destination.CreateWorkProfile)
+                }
             }
             if (privilege.work) {
                 WorkingModeItem(R.string.org_owned_work_profile, privilege.org) {
@@ -255,7 +262,9 @@ fun WorkModesScreen(
         if (dialog == 2) CircularProgressDialog { }
         if (dialog == 3) AlertDialog(
             title = {
-                Text(stringResource(if (operationSucceed) R.string.succeeded else R.string.failed))
+                Text(
+                    stringResource(if (operationSucceed) R.string.succeeded else R.string.failed)
+                )
             },
             text = {
                 Column(
@@ -352,16 +361,13 @@ fun WorkModesScreen(
 }
 
 @Composable
-private fun WorkingModeItem(
-    text: Int, active: Boolean, enabled: Boolean = true, onClick: () -> Unit
-) {
+private fun WorkingModeItem(text: Int, active: Boolean, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(onClick = onClick)
             .background(if (active) colorScheme.primaryContainer else Color.Transparent)
-            .padding(HorizontalPadding, 10.dp)
-            .alpha(if (enabled) 1F else 0.5F),
+            .padding(HorizontalPadding, 10.dp),
         Arrangement.SpaceBetween, Alignment.CenterVertically
     ) {
         Text(stringResource(text), style = typography.titleLarge)
