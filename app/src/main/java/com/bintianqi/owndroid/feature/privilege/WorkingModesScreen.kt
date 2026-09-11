@@ -171,7 +171,9 @@ fun WorkModesScreen(
             if (
                 privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())
             ) {
-                WorkingModeItem(R.string.work_profile, privilege.work, enabled = false) { }
+                WorkingModeItem(R.string.work_profile, privilege.work, enabled = false) {
+                    if (!privilege.work) onNavigate(Destination.CreateWorkProfile)
+                }
             }
             if (privilege.work) {
                 WorkingModeItem(R.string.org_owned_work_profile, privilege.org) {
