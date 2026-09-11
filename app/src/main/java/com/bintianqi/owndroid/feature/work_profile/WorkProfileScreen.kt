@@ -1,10 +1,12 @@
 package com.bintianqi.owndroid.feature.work_profile
 
 import android.app.admin.DevicePolicyManager
+import android.content.Context
 import android.app.admin.DevicePolicyManager.WIPE_EUICC
 import android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE
 import android.os.Build.VERSION
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,8 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -47,7 +53,26 @@ fun WorkProfileScreen(
     vm: WorkProfileViewModel, onNavigateUp: () -> Unit, onNavigate: (Destination) -> Unit
 ) {
     val privilege by vm.privilegeState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("data", Context.MODE_PRIVATE) }
+    var showHiddenFeatures by rememberSaveable {
+        mutableStateOf(prefs.getBoolean("show_hidden_features_by_royall", false))
+    }
     MyScaffold(R.string.work_profile, onNavigateUp, 0.dp) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = HorizontalPadding, vertical = 8.dp),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Show Hidden Features by Royall")
+            Switch(showHiddenFeatures) {
+                showHiddenFeatures = it
+                prefs.edit().putBoolean("show_hidden_features_by_royall", it).apply()
+            }
+        }
+        HorizontalDivider()
         if (privilege.org) {
             FunctionItem(R.string.suspend_personal_app, icon = R.drawable.block_fill0) {
                 onNavigate(Destination.SuspendPersonalApp)
@@ -56,8 +81,10 @@ fun WorkProfileScreen(
         FunctionItem(R.string.intent_filter, icon = R.drawable.filter_alt_fill0) {
             onNavigate(Destination.CrossProfileIntentFilter)
         }
-        FunctionItem(R.string.delete_work_profile, icon = R.drawable.delete_forever_fill0) {
-            onNavigate(Destination.DeleteWorkProfile)
+        if (showHiddenFeatures) {
+            FunctionItem(R.string.delete_work_profile, icon = R.drawable.delete_forever_fill0) {
+                onNavigate(Destination.DeleteWorkProfile)
+            }
         }
     }
 }
