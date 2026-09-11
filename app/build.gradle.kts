@@ -22,7 +22,7 @@ android {
     lint.disable += "All"
 
     defaultConfig {
-        applicationId = "com.bintianqi.owndroid"
+        applicationId = "com.royall.owndroid"
         minSdk = 23
         targetSdk = 37
         versionCode = 47
