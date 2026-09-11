@@ -50,6 +50,7 @@ class SettingsViewModel(
 
     val dangerousFeaturesState = MutableStateFlow(settingsRepo.data.displayDangerousFeatures)
     val shortcutsState = MutableStateFlow(settingsRepo.data.shortcut.enabled)
+    val hiddenFeaturesState = MutableStateFlow(settingsRepo.data.showHiddenFeatures)
 
     fun setDisplayDangerousFeatures(state: Boolean) {
         settingsRepo.update { it.displayDangerousFeatures = state }
@@ -60,6 +61,11 @@ class SettingsViewModel(
         settingsRepo.update { it.shortcut.enabled = enabled }
         ShortcutUtils.setAllShortcuts(application, settingsRepo, ph, enabled)
         shortcutsState.value = enabled
+    }
+
+    fun setShowHiddenFeatures(enabled: Boolean) {
+        settingsRepo.update { it.showHiddenFeatures = enabled }
+        hiddenFeaturesState.value = enabled
     }
 
     fun getAppLockConfig() = settingsRepo.data.appLock
