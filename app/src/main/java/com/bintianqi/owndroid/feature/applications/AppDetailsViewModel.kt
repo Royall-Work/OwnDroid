@@ -78,7 +78,34 @@ class AppDetailsViewModel(
     }
 
     fun setHidden(status: Boolean) = ph.safeDpmCall {
-        dpm.setApplicationHidden(dar, packageName, status)
+        val userControlPackages = if (VERSION.SDK_INT >= 30)
+            dpm.getUserControlDisabledPackages(dar) else emptyList()
+        val meteredPackages = if (VERSION.SDK_INT >= 28)
+            dpm.getMeteredDataDisabledPackages(dar) else emptyList()
+
+        if (status) {
+            if (packageName in userControlPackages) {
+                dpm.setUserControlDisabledPackages(
+                    dar, userControlPackages.plusOrMinus(false, packageName)
+                )
+            }
+            if (packageName in meteredPackages) {
+                dpm.setMeteredDataDisabledPackages(
+                    dar, meteredPackages.plusOrMinus(false, packageName)
+                )
+            }
+        }
+
+        try {
+            dpm.setApplicationHidden(dar, packageName, status)
+        } finally {
+            if (status && packageName in userControlPackages) {
+                dpm.setUserControlDisabledPackages(dar, userControlPackages)
+            }
+            if (status && packageName in meteredPackages) {
+                dpm.setMeteredDataDisabledPackages(dar, meteredPackages)
+            }
+        }
         uiState.update { it.copy(hide = dpm.isApplicationHidden(dar, packageName)) }
     }
 
