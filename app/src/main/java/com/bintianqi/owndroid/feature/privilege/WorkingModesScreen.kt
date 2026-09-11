@@ -171,9 +171,7 @@ fun WorkModesScreen(
             if (
                 privilege.work || (VERSION.SDK_INT < 24 || vm.isCreatingWorkProfileAllowed())
             ) {
-                WorkingModeItem(R.string.work_profile, privilege.work) {
-                    if (!privilege.work) onNavigate(Destination.CreateWorkProfile)
-                }
+                WorkingModeItem(R.string.work_profile, privilege.work, enabled = false) { }
             }
             if (privilege.work) {
                 WorkingModeItem(R.string.org_owned_work_profile, privilege.org) {
@@ -359,11 +357,17 @@ fun WorkModesScreen(
 }
 
 @Composable
-private fun WorkingModeItem(text: Int, active: Boolean, onClick: () -> Unit) {
+private fun WorkingModeItem(
+    text: Int,
+    active: Boolean,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
+            .alpha(if (enabled) 1F else 0.5F)
             .background(if (active) colorScheme.primaryContainer else Color.Transparent)
             .padding(HorizontalPadding, 10.dp),
         Arrangement.SpaceBetween, Alignment.CenterVertically
