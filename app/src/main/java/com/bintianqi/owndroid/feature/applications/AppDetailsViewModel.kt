@@ -99,12 +99,16 @@ class AppDetailsViewModel(
         try {
             dpm.setApplicationHidden(dar, packageName, status)
         } finally {
-            if (status && packageName in userControlPackages) {
-                dpm.setUserControlDisabledPackages(dar, userControlPackages)
-            }
             if (status && packageName in meteredPackages) {
                 dpm.setMeteredDataDisabledPackages(dar, meteredPackages)
             }
+            if (status && packageName in userControlPackages) {
+                dpm.setUserControlDisabledPackages(dar, userControlPackages)
+            }
+        }
+
+        if (status && !dpm.isApplicationHidden(dar, packageName)) {
+            dpm.setApplicationHidden(dar, packageName, true)
         }
         uiState.update { it.copy(hide = dpm.isApplicationHidden(dar, packageName)) }
     }
