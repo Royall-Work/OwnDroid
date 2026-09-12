@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.UserManager
 import android.util.Log
 
 class ApiReceiver : BroadcastReceiver() {
@@ -66,6 +67,49 @@ class ApiReceiver : BroadcastReceiver() {
 
                         "CLEAR_USER_RESTRICTION" -> {
                             dpm.clearUserRestriction(dar, restriction)
+                        }
+
+                        "DISALLOW_INSTALL_APPS" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_INSTALL_APPS)
+                        }
+                        "ALLOW_INSTALL_APPS" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_INSTALL_APPS)
+                        }
+                        "DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)
+                        }
+                        "ALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)
+                        }
+                        "DISALLOW_INSTALL_UNKNOWN_SOURCES" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+                        }
+                        "ALLOW_INSTALL_UNKNOWN_SOURCES" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+                        }
+                        "DISALLOW_UNINSTALL_APPS" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_UNINSTALL_APPS)
+                        }
+                        "ALLOW_UNINSTALL_APPS" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_UNINSTALL_APPS)
+                        }
+                        "DISALLOW_APPS_CONTROL" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_APPS_CONTROL)
+                        }
+                        "ALLOW_APPS_CONTROL" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_APPS_CONTROL)
+                        }
+                        "DISALLOW_CONFIG_DEFAULT_APPS" -> {
+                            dpm.addUserRestriction(dar, UserManager.DISALLOW_CONFIG_DEFAULT_APPS)
+                        }
+                        "ALLOW_CONFIG_DEFAULT_APPS" -> {
+                            dpm.clearUserRestriction(dar, UserManager.DISALLOW_CONFIG_DEFAULT_APPS)
+                        }
+                        "ENSURE_VERIFY_APPS" -> {
+                            dpm.addUserRestriction(dar, UserManager.ENSURE_VERIFY_APPS)
+                        }
+                        "ALLOW_VERIFY_APPS" -> {
+                            dpm.clearUserRestriction(dar, UserManager.ENSURE_VERIFY_APPS)
                         }
 
                         "SET_PERMISSION_DEFAULT" -> {
