@@ -97,6 +97,11 @@ class AppDetailsViewModel(
         }
 
         try {
+            if (status) {
+                // Refresh the current admin's hidden policy first. This also clears a stale
+                // hidden policy left by older versions before applying the requested state again.
+                dpm.setApplicationHidden(dar, packageName, false)
+            }
             dpm.setApplicationHidden(dar, packageName, status)
         } finally {
             if (status && packageName in meteredPackages) {
@@ -136,7 +141,8 @@ class AppDetailsViewModel(
             dpm.getMeteredDataDisabledPackages(dar).plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(dar))
+            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(dar)
+            )
         }
     }
 
