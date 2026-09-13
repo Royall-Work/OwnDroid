@@ -4,8 +4,11 @@ import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.UserManager
 import android.util.Log
+import org.json.JSONArray
+import org.json.JSONObject
 
 class ApiReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -17,13 +20,17 @@ class ApiReceiver : BroadcastReceiver() {
             val app = intent.getStringExtra("package")
             val permission = intent.getStringExtra("permission")
             val restriction = intent.getStringExtra("restriction")
+            val query = intent.getStringExtra("query")
             if (!app.isNullOrEmpty()) log += "\npackage: $app"
             if (!permission.isNullOrEmpty()) log += "\npermission: $permission"
             if (!restriction.isNullOrEmpty()) log += "\nrestriction: $restriction"
+            if (!query.isNullOrEmpty()) log += "\nquery: $query"
             try {
                 myApp.container.privilegeHelper.safeDpmCall {
                     @SuppressWarnings("NewApi")
                     when (intent.action?.removePrefix("com.bintianqi.owndroid.action.")) {
+                        "GET" -> handleGet(intent, query, app, permission, restriction)
+
                         "HIDE" -> dpm.setApplicationHidden(dar, app, true)
                         "UNHIDE" -> dpm.setApplicationHidden(dar, app, false)
                         "SUSPEND" -> dpm.setPackagesSuspended(dar, arrayOf(app), true)
@@ -132,11 +139,88 @@ class ApiReceiver : BroadcastReceiver() {
                 e.printStackTrace()
                 val message = (e::class.qualifiedName ?: "Exception") + ": " + (e.message ?: "")
                 log += "\n$message"
+                setResultData(JSONObject().apply {
+                    put("success", false)
+                    put("error", message)
+                }.toString())
             }
         } else {
             log += "\nUnauthorized"
         }
         Log.d(TAG, log)
+    }
+
+    @SuppressWarnings("NewApi")
+    private fun handleGet(
+        intent: Intent,
+        query: String?,
+        app: String?,
+        permission: String?,
+        restriction: String?
+    ) {
+        if (query.isNullOrBlank()) throw IllegalArgumentException("Missing query")
+
+        val result = JSONObject().put("success", true).put("query", query)
+        when (query.uppercase()) {
+            "HIDDEN" -> {
+                requirePackage(app)
+                result.put("value", dpm.isApplicationHidden(dar, app))
+            }
+            "SUSPENDED" -> {
+                requirePackage(app)
+                if (Build.VERSION.SDK_INT < 24) throw IllegalArgumentException("Requires Android 7.0+")
+                result.put("value", dpm.isPackageSuspended(dar, app))
+            }
+            "UNINSTALL_BLOCKED" -> {
+                requirePackage(app)
+                result.put("value", dpm.isUninstallBlocked(dar, app))
+            }
+            "USER_CONTROL_DISABLED" -> {
+                requirePackage(app)
+                if (Build.VERSION.SDK_INT < 30) throw IllegalArgumentException("Requires Android 11+")
+                result.put("value", app in dpm.getUserControlDisabledPackages(dar))
+            }
+            "METERED_DATA_DISABLED" -> {
+                requirePackage(app)
+                if (Build.VERSION.SDK_INT < 28) throw IllegalArgumentException("Requires Android 9+")
+                result.put("value", app in dpm.getMeteredDataDisabledPackages(dar))
+            }
+            "CAMERA_DISABLED" -> result.put("value", dpm.isCameraDisabled(dar))
+            "SCREEN_CAPTURE_DISABLED" -> result.put("value", dpm.getScreenCaptureDisabled(dar))
+            "USB_DATA_SIGNALING_ENABLED" -> {
+                if (Build.VERSION.SDK_INT < 31) throw IllegalArgumentException("Requires Android 12+")
+                result.put("value", dpm.isUsbDataSignalingEnabled)
+            }
+            "PERMISSION_STATE" -> {
+                requirePackage(app)
+                if (Build.VERSION.SDK_INT < 23) throw IllegalArgumentException("Requires Android 6.0+")
+                if (permission.isNullOrBlank()) throw IllegalArgumentException("Missing permission")
+                result.put("value", dpm.getPermissionGrantState(dar, app, permission))
+            }
+            "USER_RESTRICTIONS" -> {
+                val restrictions = dpm.getUserRestrictions(dar)
+                result.put("restrictions", JSONArray(restrictions.keys.toList()))
+            }
+            "USER_RESTRICTION" -> {
+                val resolved = resolveUserRestriction(restriction)
+                result.put("restriction", resolved)
+                result.put("value", dpm.getUserRestrictions(dar).getBoolean(resolved, false))
+            }
+            "USER_CONTROL_DISABLED_PACKAGES" -> {
+                if (Build.VERSION.SDK_INT < 30) throw IllegalArgumentException("Requires Android 11+")
+                result.put("packages", JSONArray(dpm.getUserControlDisabledPackages(dar)))
+            }
+            "METERED_DATA_DISABLED_PACKAGES" -> {
+                if (Build.VERSION.SDK_INT < 28) throw IllegalArgumentException("Requires Android 9+")
+                result.put("packages", JSONArray(dpm.getMeteredDataDisabledPackages(dar)))
+            }
+            else -> throw IllegalArgumentException("Unknown query: $query")
+        }
+        setResultData(result.toString())
+    }
+
+    private fun requirePackage(app: String?) {
+        if (app.isNullOrBlank()) throw IllegalArgumentException("Missing package")
     }
 
     private fun resolveUserRestriction(value: String?): String {
