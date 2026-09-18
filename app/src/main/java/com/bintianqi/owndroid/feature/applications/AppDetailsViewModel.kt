@@ -127,13 +127,14 @@ class AppDetailsViewModel(
 
     @RequiresApi(30)
     fun setUserControlDisabled(state: Boolean) = ph.safeDpmCall {
+        if (!ph.canManageUserControlDisabledPackages) return@safeDpmCall
+        val adminForUcd = if (ph.delegatedAdmin) null else dar
         dpm.setUserControlDisabledPackages(
-            dar,
-            dpm.getUserControlDisabledPackages(if (ph.delegatedAdmin) null else dar)
-                .plusOrMinus(state, packageName)
+            adminForUcd,
+            dpm.getUserControlDisabledPackages(adminForUcd).plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(if (ph.delegatedAdmin) null else dar))
+            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(adminForUcd))
         }
     }
 
