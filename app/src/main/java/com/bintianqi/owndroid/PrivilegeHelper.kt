@@ -28,6 +28,12 @@ class PrivilegeHelper(
     val delegatedAdmin: Boolean
         get() = !dhizuku && _delegatedScopes.isNotEmpty() && !isOwnAdmin()
 
+    val canManageUserControlDisabledPackages: Boolean
+        get() = !delegatedAdmin ||
+                context.checkSelfPermission(
+                    "android.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL"
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
     val delegatedDar: ComponentName?
         get() = if (delegatedAdmin) null else dar
 
