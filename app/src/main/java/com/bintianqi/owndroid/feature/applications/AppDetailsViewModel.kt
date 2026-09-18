@@ -55,15 +55,15 @@ class AppDetailsViewModel(
 
     private fun getStatus() = ph.safeDpmCall {
         uiState.value = AppDetailsUiState(
-            if (VERSION.SDK_INT >= 24) dpm.isPackageSuspended(dar, packageName) else false,
-            dpm.isApplicationHidden(dar, packageName),
-            dpm.isUninstallBlocked(dar, packageName),
-            if (VERSION.SDK_INT >= 30) packageName in dpm.getUserControlDisabledPackages(dar)
+            if (VERSION.SDK_INT >= 24) dpm.isPackageSuspended(admin, packageName) else false,
+            dpm.isApplicationHidden(admin, packageName),
+            dpm.isUninstallBlocked(admin, packageName),
+            if (VERSION.SDK_INT >= 30) packageName in dpm.getUserControlDisabledPackages(admin)
             else false,
-            if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(dar)
+            if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(admin)
             else false,
             if (VERSION.SDK_INT >= 28 && privilegeState.value.device)
-                dpm.getKeepUninstalledPackages(dar)?.contains(packageName) == true
+                dpm.getKeepUninstalledPackages(admin)?.contains(packageName) == true
             else false
         )
     }
@@ -71,17 +71,17 @@ class AppDetailsViewModel(
     @RequiresApi(24)
     fun setSuspended(status: Boolean) = ph.safeDpmCall {
         try {
-            dpm.setPackagesSuspended(dar, arrayOf(packageName), status)
-            uiState.update { it.copy(suspend = dpm.isPackageSuspended(dar, packageName)) }
+            dpm.setPackagesSuspended(admin, arrayOf(packageName), status)
+            uiState.update { it.copy(suspend = dpm.isPackageSuspended(admin, packageName)) }
         } catch (_: Exception) {
         }
     }
 
     fun setHidden(status: Boolean) = ph.safeDpmCall {
         val userControlPackages = if (VERSION.SDK_INT >= 30)
-            dpm.getUserControlDisabledPackages(dar) else emptyList()
+            dpm.getUserControlDisabledPackages(admin) else emptyList()
         val meteredPackages = if (VERSION.SDK_INT >= 28)
-            dpm.getMeteredDataDisabledPackages(dar) else emptyList()
+            dpm.getMeteredDataDisabledPackages(admin) else emptyList()
 
         if (status) {
             if (packageName in userControlPackages) {
@@ -100,37 +100,37 @@ class AppDetailsViewModel(
             if (status) {
                 // Refresh the current admin's hidden policy first. This also clears a stale
                 // hidden policy left by older versions before applying the requested state again.
-                dpm.setApplicationHidden(dar, packageName, false)
+                dpm.setApplicationHidden(admin, packageName, false)
             }
-            dpm.setApplicationHidden(dar, packageName, status)
+            dpm.setApplicationHidden(admin, packageName, status)
         } finally {
             if (status && packageName in meteredPackages) {
-                dpm.setMeteredDataDisabledPackages(dar, meteredPackages)
+                dpm.setMeteredDataDisabledPackages(admin, meteredPackages)
             }
             if (status && packageName in userControlPackages) {
-                dpm.setUserControlDisabledPackages(dar, userControlPackages)
+                dpm.setUserControlDisabledPackages(admin, userControlPackages)
             }
         }
 
-        if (status && !dpm.isApplicationHidden(dar, packageName)) {
-            dpm.setApplicationHidden(dar, packageName, true)
+        if (status && !dpm.isApplicationHidden(admin, packageName)) {
+            dpm.setApplicationHidden(admin, packageName, true)
         }
-        uiState.update { it.copy(hide = dpm.isApplicationHidden(dar, packageName)) }
+        uiState.update { it.copy(hide = dpm.isApplicationHidden(admin, packageName)) }
     }
 
     fun setUninstallBlocked(status: Boolean) = ph.safeDpmCall {
-        dpm.setUninstallBlocked(dar, packageName, status)
-        uiState.update { it.copy(uninstallBlocked = dpm.isUninstallBlocked(dar, packageName)) }
+        dpm.setUninstallBlocked(admin, packageName, status)
+        uiState.update { it.copy(uninstallBlocked = dpm.isUninstallBlocked(admin, packageName)) }
     }
 
     @RequiresApi(30)
     fun setUserControlDisabled(state: Boolean) = ph.safeDpmCall {
         dpm.setUserControlDisabledPackages(
             dar,
-            dpm.getUserControlDisabledPackages(dar).plusOrMinus(state, packageName)
+            dpm.getUserControlDisabledPackages(admin).plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(dar))
+            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(admin))
         }
     }
 
@@ -138,10 +138,10 @@ class AppDetailsViewModel(
     fun setMeteredDataDisabled(state: Boolean) = ph.safeDpmCall {
         dpm.setMeteredDataDisabledPackages(
             dar,
-            dpm.getMeteredDataDisabledPackages(dar).plusOrMinus(state, packageName)
+            dpm.getMeteredDataDisabledPackages(admin).plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(dar)
+            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(admin)
             )
         }
     }
@@ -150,11 +150,11 @@ class AppDetailsViewModel(
     fun setKeepUninstalled(state: Boolean) = ph.safeDpmCall {
         dpm.setKeepUninstalledPackages(
             dar,
-            (dpm.getKeepUninstalledPackages(dar) ?: emptyList()).plusOrMinus(state, packageName)
+            (dpm.getKeepUninstalledPackages(admin) ?: emptyList()).plusOrMinus(state, packageName)
         )
         uiState.update {
             it.copy(
-                keepUninstalled = dpm.getKeepUninstalledPackages(dar)?.contains(packageName) == true
+                keepUninstalled = dpm.getKeepUninstalledPackages(admin)?.contains(packageName) == true
             )
         }
     }
@@ -184,7 +184,7 @@ class AppDetailsViewModel(
         }
         ph.safeDpmCall {
             permissionsState.value = actualPermissions.associateWith {
-                dpm.getPermissionGrantState(dar, packageName, it.id)
+                dpm.getPermissionGrantState(admin, packageName, it.id)
             }
         }
     }
@@ -192,7 +192,7 @@ class AppDetailsViewModel(
     fun setPermission(permission: String, status: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
-                val result = dpm.setPermissionGrantState(dar, packageName, permission, status)
+                val result = dpm.setPermissionGrantState(admin, packageName, permission, status)
                 if (result) {
                     getPermissions()
                 } else {
@@ -204,7 +204,7 @@ class AppDetailsViewModel(
 
     @RequiresApi(28)
     fun clearData(callback: () -> Unit) = ph.safeDpmCall {
-        dpm.clearApplicationUserData(dar, packageName, application.mainExecutor) { _, result ->
+        dpm.clearApplicationUserData(admin, packageName, application.mainExecutor) { _, result ->
             callback()
             toastChannel.sendStatus(result)
         }
