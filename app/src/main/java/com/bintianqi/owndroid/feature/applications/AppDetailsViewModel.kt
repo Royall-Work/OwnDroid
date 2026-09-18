@@ -60,7 +60,7 @@ class AppDetailsViewModel(
             dpm.isUninstallBlocked(admin, packageName),
             if (VERSION.SDK_INT >= 30) packageName in dpm.getUserControlDisabledPackages(admin)
             else false,
-            if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(admin)
+            if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(dar)
             else false,
             if (VERSION.SDK_INT >= 28 && privilegeState.value.device)
                 dpm.getKeepUninstalledPackages(admin)?.contains(packageName) == true
@@ -81,7 +81,7 @@ class AppDetailsViewModel(
         val userControlPackages = if (VERSION.SDK_INT >= 30)
             dpm.getUserControlDisabledPackages(admin) else emptyList()
         val meteredPackages = if (VERSION.SDK_INT >= 28)
-            dpm.getMeteredDataDisabledPackages(admin) else emptyList()
+            dpm.getMeteredDataDisabledPackages(dar) else emptyList()
 
         if (status) {
             if (packageName in userControlPackages) {
@@ -105,7 +105,7 @@ class AppDetailsViewModel(
             dpm.setApplicationHidden(admin, packageName, status)
         } finally {
             if (status && packageName in meteredPackages) {
-                dpm.setMeteredDataDisabledPackages(admin, meteredPackages)
+                dpm.setMeteredDataDisabledPackages(dar, meteredPackages)
             }
             if (status && packageName in userControlPackages) {
                 dpm.setUserControlDisabledPackages(admin, userControlPackages)
@@ -138,10 +138,10 @@ class AppDetailsViewModel(
     fun setMeteredDataDisabled(state: Boolean) = ph.safeDpmCall {
         dpm.setMeteredDataDisabledPackages(
             dar,
-            dpm.getMeteredDataDisabledPackages(admin).plusOrMinus(state, packageName)
+            dpm.getMeteredDataDisabledPackages(dar).plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(admin)
+            it.copy(meteredDataDisabled = packageName in dpm.getMeteredDataDisabledPackages(dar)
             )
         }
     }
@@ -204,7 +204,7 @@ class AppDetailsViewModel(
 
     @RequiresApi(28)
     fun clearData(callback: () -> Unit) = ph.safeDpmCall {
-        dpm.clearApplicationUserData(admin, packageName, application.mainExecutor) { _, result ->
+        dpm.clearApplicationUserData(dar, packageName, application.mainExecutor) { _, result ->
             callback()
             toastChannel.sendStatus(result)
         }
