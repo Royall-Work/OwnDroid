@@ -50,7 +50,7 @@ class TransferOwnershipViewModel(
         dpm.transferOwnership(dar, component, null)
         ph.refreshDelegatedScopes()
         ps.value = getPrivilegeStatus(
-            dpm, dar, false,
+            dpm, if (ph.delegatedAdmin) null else dar, false,
             ph.delegatedScopes
         )
     }
