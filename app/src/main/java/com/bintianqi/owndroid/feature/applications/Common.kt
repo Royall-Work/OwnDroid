@@ -337,7 +337,7 @@ fun getAppStatus(
                 ucd = packageName in dpm.getUserControlDisabledPackages(admin)
             }
             if (Build.VERSION.SDK_INT >= 28) {
-                mdd = packageName in dpm.getMeteredDataDisabledPackages(admin)
+                mdd = packageName in dpm.getMeteredDataDisabledPackages(dar)
             }
         }
     } catch (_: Exception) {}
