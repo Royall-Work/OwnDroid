@@ -1,5 +1,6 @@
 package com.bintianqi.owndroid.feature.applications
 
+import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.Build.VERSION
 import androidx.annotation.RequiresApi
@@ -102,47 +103,72 @@ fun ApplicationsFeaturesScreen(
         R.string.applications_state, onNavigateUp, 0.dp
     ) {
         val privilege by vm.privilegeState.collectAsStateWithLifecycle()
-        FunctionItem(R.string.permissions, icon = R.drawable.shield_fill0) {
-            onNavigate(Destination.PermissionManager)
+        val packageAccess = !privilege.delegated ||
+                DevicePolicyManager.DELEGATION_PACKAGE_ACCESS in privilege.delegatedScopes
+        val permissionGrant = !privilege.delegated ||
+                DevicePolicyManager.DELEGATION_PERMISSION_GRANT in privilege.delegatedScopes
+        val blockUninstall = !privilege.delegated ||
+                DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL in privilege.delegatedScopes
+        val keepUninstalled = !privilege.delegated ||
+                (VERSION.SDK_INT >= 28 &&
+                        DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES in privilege.delegatedScopes)
+        val installExisting = !privilege.delegated ||
+                (VERSION.SDK_INT >= 28 &&
+                        DevicePolicyManager.DELEGATION_INSTALL_EXISTING_PACKAGE in privilege.delegatedScopes)
+        val enableSystemApp = !privilege.delegated ||
+                DevicePolicyManager.DELEGATION_ENABLE_SYSTEM_APP in privilege.delegatedScopes
+
+        if (permissionGrant) {
+            FunctionItem(R.string.permissions, icon = R.drawable.shield_fill0) {
+                onNavigate(Destination.PermissionManager)
+            }
         }
-        if (VERSION.SDK_INT >= 24) FunctionItem(
+        if (VERSION.SDK_INT >= 24 && packageAccess) FunctionItem(
             R.string.suspend, icon = R.drawable.block_fill0
         ) {
             onNavigate(Destination.Suspend)
         }
-        FunctionItem(R.string.hide, icon = R.drawable.visibility_off_fill0) {
-            onNavigate(Destination.Hide)
+        if (packageAccess) {
+            FunctionItem(R.string.hide, icon = R.drawable.visibility_off_fill0) {
+                onNavigate(Destination.Hide)
+            }
         }
-        FunctionItem(R.string.block_uninstall, icon = R.drawable.delete_forever_fill0) {
-            onNavigate(Destination.BlockUninstall)
+        if (blockUninstall) {
+            FunctionItem(R.string.block_uninstall, icon = R.drawable.delete_forever_fill0) {
+                onNavigate(Destination.BlockUninstall)
+            }
         }
-        if (VERSION.SDK_INT >= 30 && (privilege.device || (VERSION.SDK_INT >= 33 && privilege.profile))) {
+        if (!privilege.delegated && VERSION.SDK_INT >= 30 &&
+            (privilege.device || (VERSION.SDK_INT >= 33 && privilege.profile))
+        ) {
             FunctionItem(R.string.disable_user_control, icon = R.drawable.do_not_touch_fill0) {
                 onNavigate(Destination.DisableUserControl)
             }
         }
-        if (VERSION.SDK_INT >= 28) {
+        if (!privilege.delegated && VERSION.SDK_INT >= 28) {
             FunctionItem(R.string.disable_metered_data, icon = R.drawable.money_off_fill0) {
                 onNavigate(Destination.DisableMeteredData)
             }
         }
-        if (VERSION.SDK_INT >= 28) {
+        if (!privilege.delegated && VERSION.SDK_INT >= 28) {
             FunctionItem(R.string.clear_app_storage, icon = R.drawable.mop_fill0) {
                 onNavigate(Destination.ClearAppStorage)
             }
         }
-        FunctionItem(R.string.install_app, icon = R.drawable.install_mobile_fill0) {
-            context.startActivity(Intent(context, AppInstallerActivity::class.java))
+        if (!privilege.delegated) {
+            FunctionItem(R.string.install_app, icon = R.drawable.install_mobile_fill0) {
+                context.startActivity(Intent(context, AppInstallerActivity::class.java))
+            }
+            FunctionItem(R.string.uninstall_app, icon = R.drawable.delete_fill0) {
+                onNavigate(Destination.UninstallApp)
+            }
         }
-        FunctionItem(R.string.uninstall_app, icon = R.drawable.delete_fill0) {
-            onNavigate(Destination.UninstallApp)
-        }
-        if (VERSION.SDK_INT >= 28 && privilege.device) {
+        if (VERSION.SDK_INT >= 28 && keepUninstalled) {
             FunctionItem(R.string.keep_uninstalled_packages, icon = R.drawable.delete_fill0) {
                 onNavigate(Destination.KeepUninstalledPackages)
             }
         }
-        if (VERSION.SDK_INT >= 28 && (privilege.device || (privilege.profile && privilege.affiliated))) {
+        if (VERSION.SDK_INT >= 28 && installExisting) {
             FunctionItem(
                 R.string.install_existing_app, icon = R.drawable.install_mobile_fill0
             ) {
@@ -164,16 +190,18 @@ fun ApplicationsFeaturesScreen(
                 onNavigate(Destination.CredentialManagerPolicy)
             }
         }
-        FunctionItem(
-            R.string.permitted_accessibility_services,
-            icon = R.drawable.settings_accessibility_fill0
-        ) {
-            onNavigate(Destination.PermittedAccessibilityServices)
+        if (!privilege.delegated) {
+            FunctionItem(
+                R.string.permitted_accessibility_services,
+                icon = R.drawable.settings_accessibility_fill0
+            ) {
+                onNavigate(Destination.PermittedAccessibilityServices)
+            }
+            FunctionItem(R.string.permitted_ime, icon = R.drawable.keyboard_fill0) {
+                onNavigate(Destination.PermittedInputMethods)
+            }
         }
-        FunctionItem(R.string.permitted_ime, icon = R.drawable.keyboard_fill0) {
-            onNavigate(Destination.PermittedInputMethods)
-        }
-        FunctionItem(R.string.enable_system_app, icon = R.drawable.enable_fill0) {
+        if (enableSystemApp) FunctionItem(R.string.enable_system_app, icon = R.drawable.enable_fill0) {
             onNavigate(Destination.EnableSystemApp)
         }
         if (VERSION.SDK_INT >= 34 && (privilege.device || privilege.work)) {

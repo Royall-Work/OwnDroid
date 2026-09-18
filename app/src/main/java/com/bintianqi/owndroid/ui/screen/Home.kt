@@ -100,6 +100,13 @@ fun HomeScreen(
                 HomePageItem(
                     R.string.password_and_keyguard, R.drawable.password_fill0
                 ) { onNavigate(Destination.Password) }
+            } else if (privilege.delegated) {
+                HomePageItem(R.string.applications, R.drawable.apps_fill0) {
+                    onNavigate(Destination.ApplicationsList(AppChooserMode.ListView))
+                }
+                HomePageItem(R.string.applications_state, R.drawable.tune_fill0) {
+                    onNavigate(Destination.ApplicationFeatures)
+                }
             }
             Spacer(Modifier.height(BottomPadding))
         }

@@ -81,6 +81,7 @@
     <!--Permissions-->
     <string name="profile_owner">Profile owner</string>
     <string name="device_owner">Device owner</string>
+    <string name="delegated_admin">Delegated admin</string>
     <string name="delegated_admins">Delegated admins</string>
     <string name="manage_application_restrictions">Manage application restrictions</string>
     <string name="manage_certificates">Manage certificates</string>

@@ -60,7 +60,7 @@ class SecurityLoggingViewModel(
     fun getPreRebootSecurityLogs(callback: () -> Unit) {
         if (preRebootSecurityLogs.isNotEmpty()) callback()
         val result = try {
-            val logs = ph.myDpm.retrievePreRebootSecurityLogs(ph.myDar)
+            val logs = ph.dpm.retrievePreRebootSecurityLogs(ph.dar)
             if (!logs.isNullOrEmpty()) {
                 preRebootSecurityLogs = logs
                 true

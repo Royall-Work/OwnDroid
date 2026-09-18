@@ -48,6 +48,10 @@ class TransferOwnershipViewModel(
     @RequiresApi(28)
     fun transferOwnership(component: ComponentName) = ph.safeDpmCall {
         dpm.transferOwnership(dar, component, null)
-        ps.value = getPrivilegeStatus(dpm, dar, false)
+        ph.refreshDelegatedScopes()
+        ps.value = getPrivilegeStatus(
+            dpm, dar, false,
+            ph.delegatedScopes
+        )
     }
 }

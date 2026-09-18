@@ -142,6 +142,16 @@
         <receiver
             android:name=".ApiReceiver"
             android:exported="true"></receiver>
+        <receiver
+            android:name=".DelegatedReceiver"
+            android:exported="false"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <intent-filter>
+                <action android:name="android.app.action.CHOOSE_PRIVATE_KEY_ALIAS" />
+                <action android:name="android.app.action.NETWORK_LOGS_AVAILABLE" />
+                <action android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".LockTaskService"

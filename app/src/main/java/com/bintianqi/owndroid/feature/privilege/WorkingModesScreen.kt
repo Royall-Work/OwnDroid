@@ -159,6 +159,17 @@ fun WorkModesScreen(
                 }
             }
             if (privilege.profile) WorkingModeItem(R.string.profile_owner, true) { }
+            if (privilege.delegated) {
+                WorkingModeItem(R.string.delegated_admin, true) { }
+                Text(
+                    privilege.delegatedScopes.joinToString(", "),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = HorizontalPadding, vertical = 4.dp)
+                        .alpha(0.75F),
+                    style = typography.bodyMedium
+                )
+            }
             if (privilege.dhizuku || !privilege.activated) {
                 WorkingModeItem(R.string.dhizuku, privilege.dhizuku) {
                     if (!privilege.dhizuku) {

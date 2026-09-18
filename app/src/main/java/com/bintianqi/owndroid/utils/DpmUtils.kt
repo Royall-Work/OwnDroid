@@ -77,7 +77,7 @@ fun Context.getPackageInstaller(dhizuku: Boolean): PackageInstaller {
 fun retrieveNetworkLogs(app: MyApplication, token: Long) {
     CoroutineScope(Dispatchers.IO).launch {
         val ph = app.container.privilegeHelper
-        val logs = ph.myDpm.retrieveNetworkLogs(ph.myDar, token)?.mapNotNull {
+        val logs = ph.dpm.retrieveNetworkLogs(ph.dar, token)?.mapNotNull {
             when (it) {
                 is DnsEvent -> NetworkLog(
                     if (VERSION.SDK_INT >= 28) it.id else null, it.packageName, it.timestamp, "dns",
@@ -107,7 +107,7 @@ val activateOrgProfileCommand = "dpm mark-profile-owner-on-organization-owned-de
 fun retrieveSecurityLogs(app: MyApplication) {
     CoroutineScope(Dispatchers.IO).launch {
         val ph = app.container.privilegeHelper
-        val logs = ph.myDpm.retrieveSecurityLogs(ph.myDar)
+        val logs = ph.dpm.retrieveSecurityLogs(ph.dar)
         if (logs.isNullOrEmpty()) return@launch
         app.container.securityLoggingRepo.writeSecurityLogs(logs)
         NotificationUtils.sendBasicNotification(
@@ -175,7 +175,7 @@ fun handlePrivilegeChange(
 }
 
 fun doUserOperationWithContext(
-    context: Context, dpm: DevicePolicyManager, dar: ComponentName,
+    context: Context, dpm: DevicePolicyManager, dar: ComponentName?,
     type: UserOperationType, id: Int, isUserId: Boolean
 ): Boolean {
     val um = context.getSystemService(Context.USER_SERVICE) as UserManager
@@ -209,21 +209,30 @@ class PrivilegeStatus(
     val dhizuku: Boolean = false,
     val work: Boolean = false,
     val org: Boolean = false,
-    val affiliated: Boolean = false
+    val affiliated: Boolean = false,
+    val delegatedScopes: Set<String> = emptySet()
 ) {
+    val delegated = delegatedScopes.isNotEmpty()
     val activated = device || profile
 }
 
-fun getPrivilegeStatus(dpm: DevicePolicyManager, dar: ComponentName, dhizuku: Boolean): PrivilegeStatus {
-    val profile = dpm.isProfileOwnerApp(dar.packageName)
-    val work = profile && VERSION.SDK_INT >= 24 && dpm.isManagedProfile(dar)
+fun getPrivilegeStatus(
+    dpm: DevicePolicyManager,
+    dar: ComponentName?,
+    dhizuku: Boolean,
+    delegatedScopes: Set<String> = emptySet()
+): PrivilegeStatus {
+    val ownerPackage = dar?.packageName
+    val profile = ownerPackage != null && dpm.isProfileOwnerApp(ownerPackage)
+    val work = profile && VERSION.SDK_INT >= 24 && dar != null && dpm.isManagedProfile(dar)
     return PrivilegeStatus(
-        device = dpm.isDeviceOwnerApp(dar.packageName),
+        device = ownerPackage != null && dpm.isDeviceOwnerApp(ownerPackage),
         profile = profile,
         dhizuku = dhizuku,
         work = work,
         org = work && VERSION.SDK_INT >= 30 && dpm.isOrganizationOwnedDeviceWithManagedProfile,
-        affiliated = VERSION.SDK_INT >= 28 && dpm.isAffiliatedUser
+        affiliated = VERSION.SDK_INT >= 28 && ownerPackage != null && dpm.isAffiliatedUser,
+        delegatedScopes = delegatedScopes
     )
 }
 

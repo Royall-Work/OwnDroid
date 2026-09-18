@@ -1,5 +1,6 @@
 package com.bintianqi.owndroid.feature.applications
 
+import android.app.admin.DevicePolicyManager
 import android.os.Build.VERSION
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,18 @@ fun ApplicationDetailsScreen(
     LaunchedEffect(Unit) {
         vm.getInfo()
     }
+    val packageAccess = !privilege.delegated ||
+            DevicePolicyManager.DELEGATION_PACKAGE_ACCESS in privilege.delegatedScopes
+    val permissionGrant = !privilege.delegated ||
+            DevicePolicyManager.DELEGATION_PERMISSION_GRANT in privilege.delegatedScopes
+    val blockUninstall = !privilege.delegated ||
+            DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL in privilege.delegatedScopes
+    val keepUninstalled = !privilege.delegated ||
+            (VERSION.SDK_INT >= 28 &&
+                    DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES in privilege.delegatedScopes)
+    val appRestrictions = !privilege.delegated ||
+            DevicePolicyManager.DELEGATION_APP_RESTRICTIONS in privilege.delegatedScopes
+
     MySmallTitleScaffold(R.string.place_holder, onNavigateUp, 0.dp, {
         IconButton({ vm.viewAppDetails(context) }) {
             Icon(Icons.Outlined.Info, null)
@@ -88,35 +101,37 @@ fun ApplicationDetailsScreen(
                 style = typography.bodyMedium
             )
         }
-        FunctionItem(R.string.permissions, icon = R.drawable.shield_fill0) {
+        if (permissionGrant) FunctionItem(R.string.permissions, icon = R.drawable.shield_fill0) {
             onNavigate(Destination.AppPermissionsManager)
         }
-        if (VERSION.SDK_INT >= 24) SwitchItem(
+        if (VERSION.SDK_INT >= 24 && packageAccess) SwitchItem(
             R.string.suspend, uiState.suspend, vm::setSuspended, R.drawable.block_fill0
         )
-        SwitchItem(
+        if (packageAccess) SwitchItem(
             R.string.hide, uiState.hide, vm::setHidden, R.drawable.visibility_off_fill0
         )
-        SwitchItem(
+        if (blockUninstall) SwitchItem(
             R.string.block_uninstall, uiState.uninstallBlocked,
             vm::setUninstallBlocked, R.drawable.delete_forever_fill0
         )
-        if (VERSION.SDK_INT >= 30) SwitchItem(
+        if (!privilege.delegated && VERSION.SDK_INT >= 30) SwitchItem(
             R.string.disable_user_control, uiState.userControlDisabled,
             vm::setUserControlDisabled, R.drawable.do_not_touch_fill0
         )
-        if (VERSION.SDK_INT >= 28) SwitchItem(
+        if (!privilege.delegated && VERSION.SDK_INT >= 28) SwitchItem(
             R.string.disable_metered_data, uiState.meteredDataDisabled,
             vm::setMeteredDataDisabled, R.drawable.money_off_fill0
         )
-        if (privilege.device && VERSION.SDK_INT >= 28) SwitchItem(
+        if (keepUninstalled && VERSION.SDK_INT >= 28) SwitchItem(
             R.string.keep_after_uninstall, uiState.keepUninstalled,
             vm::setKeepUninstalled, R.drawable.delete_fill0
         )
-        FunctionItem(R.string.managed_configuration, icon = R.drawable.description_fill0) {
+        if (appRestrictions) FunctionItem(
+            R.string.managed_configuration, icon = R.drawable.description_fill0
+        ) {
             onNavigate(Destination.ManagedConfiguration(vm.packageName))
         }
-        Row(Modifier.fillMaxWidth().padding(8.dp)) {
+        if (!privilege.delegated) Row(Modifier.fillMaxWidth().padding(8.dp)) {
             FilledTonalButton(
                 { dialog = 1 },
                 Modifier.padding(horizontal = 4.dp).weight(1F)

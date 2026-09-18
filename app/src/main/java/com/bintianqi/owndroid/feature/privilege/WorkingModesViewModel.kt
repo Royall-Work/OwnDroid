@@ -34,7 +34,11 @@ class WorkingModesViewModel(
 ) : ViewModel() {
 
     fun getPrivilegeState() = ph.safeDpmCall {
-        ps.value = getPrivilegeStatus(dpm, dar, ph.dhizuku)
+        ph.refreshDelegatedScopes()
+        ps.value = getPrivilegeStatus(
+            dpm, dar, ph.dhizuku,
+            ph.delegatedScopes
+        )
     }
 
     @RequiresApi(24)
@@ -155,7 +159,11 @@ class WorkingModesViewModel(
     }
 
     private fun updateStatus() = ph.safeDpmCall {
-        ps.value = getPrivilegeStatus(dpm, dar, ph.dhizuku)
+        ph.refreshDelegatedScopes()
+        ps.value = getPrivilegeStatus(
+            dpm, dar, ph.dhizuku,
+            ph.delegatedScopes
+        )
         handlePrivilegeChange(application, ps.value, ph, sr)
     }
 }
