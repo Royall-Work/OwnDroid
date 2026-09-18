@@ -207,7 +207,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun clearStorage(packageName: String, callback: () -> Unit) = ph.safeDpmCall {
-        dpm.clearApplicationUserData(admin, packageName, application.mainExecutor) { _, result ->
+        dpm.clearApplicationUserData(dar, packageName, application.mainExecutor) { _, result ->
             callback()
             toastChannel.sendStatus(result)
         }
@@ -222,7 +222,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun getMddPackages() = ph.safeDpmCall {
-        mddPackages.value = dpm.getMeteredDataDisabledPackages(admin).distinct()
+        mddPackages.value = dpm.getMeteredDataDisabledPackages(dar).distinct()
     }
 
     @RequiresApi(28)
@@ -254,7 +254,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(30)
     fun getCpPackages() = ph.safeDpmCall {
-        cpPackages.value = dpm.getCrossProfilePackages(admin).toList()
+        cpPackages.value = dpm.getCrossProfilePackages(dar).toList()
     }
 
     @RequiresApi(30)
@@ -285,7 +285,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun installExistingApp(name: String) = ph.safeDpmCall {
-        val result = dpm.installExistingPackage(admin, name)
+        val result = dpm.installExistingPackage(admin as android.content.ComponentName, name)
         toastChannel.sendStatus(result)
     }
 
@@ -363,7 +363,7 @@ class AppFeaturesViewModel(
     val pasAllowAll = MutableStateFlow(true)
     val pasPackages = MutableStateFlow(emptyList<AppInfo>())
     fun getPasPolicy() = ph.safeDpmCall {
-        val packages = dpm.getPermittedAccessibilityServices(admin)
+        val packages = dpm.getPermittedAccessibilityServices(dar)
         pasAllowAll.value = packages == null
         if (packages != null) pasPackages.value = packages.distinct().map { getAppInfo(pm, it) }
     }
