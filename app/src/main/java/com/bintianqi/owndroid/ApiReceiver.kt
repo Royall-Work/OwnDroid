@@ -39,16 +39,22 @@ class ApiReceiver : BroadcastReceiver() {
                             )
                         }
                         "DISABLE_USER_CONTROL" -> {
-                            if (!delegatedAdmin) {
+                            if (canManageUserControlDisabledPackages) {
                                 dpm.setUserControlDisabledPackages(
-                                    dar, dpm.getUserControlDisabledPackages(dar) + app
+                                    if (delegatedAdmin) null else dar,
+                                    dpm.getUserControlDisabledPackages(
+                                        if (delegatedAdmin) null else dar
+                                    ) + app
                                 )
                             }
                         }
                         "ENABLE_USER_CONTROL" -> {
-                            if (!delegatedAdmin) {
+                            if (canManageUserControlDisabledPackages) {
                                 dpm.setUserControlDisabledPackages(
-                                    dar, dpm.getUserControlDisabledPackages(dar).filter { it != app }
+                                    if (delegatedAdmin) null else dar,
+                                    dpm.getUserControlDisabledPackages(
+                                        if (delegatedAdmin) null else dar
+                                    ).filter { it != app }
                                 )
                             }
                         }
