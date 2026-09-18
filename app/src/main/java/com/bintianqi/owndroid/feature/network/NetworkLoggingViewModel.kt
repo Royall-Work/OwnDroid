@@ -20,12 +20,12 @@ class NetworkLoggingViewModel(
 
     @RequiresApi(26)
     fun getEnabled() = ph.safeDpmCall {
-        enabledState.value = dpm.isNetworkLoggingEnabled(dar)
+        enabledState.value = dpm.isNetworkLoggingEnabled(admin)
     }
 
     @RequiresApi(26)
     fun setEnabled(enabled: Boolean) = ph.safeDpmCall {
-        dpm.setNetworkLoggingEnabled(dar, enabled)
+        dpm.setNetworkLoggingEnabled(admin, enabled)
         getEnabled()
     }
 
