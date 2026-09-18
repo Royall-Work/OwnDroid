@@ -77,7 +77,7 @@ fun Context.getPackageInstaller(dhizuku: Boolean): PackageInstaller {
 fun retrieveNetworkLogs(app: MyApplication, token: Long) {
     CoroutineScope(Dispatchers.IO).launch {
         val ph = app.container.privilegeHelper
-        val logs = ph.dpm.retrieveNetworkLogs(ph.dar, token)?.mapNotNull {
+        val logs = ph.dpm.retrieveNetworkLogs(ph.delegatedDar ?: ph.dar, token)?.mapNotNull {
             when (it) {
                 is DnsEvent -> NetworkLog(
                     if (VERSION.SDK_INT >= 28) it.id else null, it.packageName, it.timestamp, "dns",
@@ -107,7 +107,7 @@ val activateOrgProfileCommand = "dpm mark-profile-owner-on-organization-owned-de
 fun retrieveSecurityLogs(app: MyApplication) {
     CoroutineScope(Dispatchers.IO).launch {
         val ph = app.container.privilegeHelper
-        val logs = ph.dpm.retrieveSecurityLogs(ph.dar)
+        val logs = ph.dpm.retrieveSecurityLogs(ph.delegatedDar ?: ph.dar)
         if (logs.isNullOrEmpty()) return@launch
         app.container.securityLoggingRepo.writeSecurityLogs(logs)
         NotificationUtils.sendBasicNotification(
