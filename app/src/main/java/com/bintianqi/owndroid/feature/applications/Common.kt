@@ -317,7 +317,7 @@ fun getAppStatus(
     var mdd = false
     try {
         ph.safeDpmCall {
-            val bundle = dpm.getApplicationRestrictions(dar, packageName)
+            val bundle = dpm.getApplicationRestrictions(admin, packageName)
             val entries = rm.getManifestRestrictions(packageName)
             if (entries != null) {
                 hasMc = true
@@ -329,15 +329,15 @@ fun getAppStatus(
     try {
         ph.safeDpmCall {
             if (Build.VERSION.SDK_INT >= 24) {
-                suspended = dpm.isPackageSuspended(dar, packageName)
+                suspended = dpm.isPackageSuspended(admin, packageName)
             }
-            hidden = dpm.isApplicationHidden(dar, packageName)
-            ub = dpm.isUninstallBlocked(dar, packageName)
+            hidden = dpm.isApplicationHidden(admin, packageName)
+            ub = dpm.isUninstallBlocked(admin, packageName)
             if (Build.VERSION.SDK_INT >= 30) {
-                ucd = packageName in dpm.getUserControlDisabledPackages(dar)
+                ucd = packageName in dpm.getUserControlDisabledPackages(admin)
             }
             if (Build.VERSION.SDK_INT >= 28) {
-                mdd = packageName in dpm.getMeteredDataDisabledPackages(dar)
+                mdd = packageName in dpm.getMeteredDataDisabledPackages(admin)
             }
         }
     } catch (_: Exception) {}
