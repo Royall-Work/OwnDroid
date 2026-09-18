@@ -213,7 +213,7 @@ class PrivilegeStatus(
     val delegatedScopes: Set<String> = emptySet()
 ) {
     val delegated = delegatedScopes.isNotEmpty()
-    val activated = device || profile
+    val activated = device || profile || delegated
 }
 
 fun getPrivilegeStatus(
