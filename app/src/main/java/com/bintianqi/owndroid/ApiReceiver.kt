@@ -24,10 +24,10 @@ class ApiReceiver : BroadcastReceiver() {
                 myApp.container.privilegeHelper.safeDpmCall {
                     @SuppressWarnings("NewApi")
                     when (intent.action?.removePrefix("com.bintianqi.owndroid.action.")) {
-                        "HIDE" -> dpm.setApplicationHidden(dar, app, true)
-                        "UNHIDE" -> dpm.setApplicationHidden(dar, app, false)
-                        "SUSPEND" -> dpm.setPackagesSuspended(dar, arrayOf(app), true)
-                        "UNSUSPEND" -> dpm.setPackagesSuspended(dar, arrayOf(app), false)
+                        "HIDE" -> dpm.setApplicationHidden(admin, app, true)
+                        "UNHIDE" -> dpm.setApplicationHidden(admin, app, false)
+                        "SUSPEND" -> dpm.setPackagesSuspended(admin, arrayOf(app), true)
+                        "UNSUSPEND" -> dpm.setPackagesSuspended(admin, arrayOf(app), false)
                         "DISABLE_METERED_DATA" -> {
                             dpm.setMeteredDataDisabledPackages(
                                 dar, dpm.getMeteredDataDisabledPackages(dar) + app
@@ -50,10 +50,10 @@ class ApiReceiver : BroadcastReceiver() {
                         }
 
                         "BLOCK_UNINSTALL" -> {
-                            dpm.setUninstallBlocked(dar, app, true)
+                            dpm.setUninstallBlocked(admin, app, true)
                         }
                         "UNBLOCK_UNINSTALL" -> {
-                            dpm.setUninstallBlocked(dar, app, false)
+                            dpm.setUninstallBlocked(admin, app, false)
                         }
 
                         "CLEAR_APP_STORAGE" -> {
@@ -72,21 +72,21 @@ class ApiReceiver : BroadcastReceiver() {
 
                         "SET_PERMISSION_DEFAULT" -> {
                             dpm.setPermissionGrantState(
-                                dar, app!!, permission!!,
+                                admin, app!!, permission!!,
                                 DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
                             )
                         }
 
                         "SET_PERMISSION_GRANTED" -> {
                             dpm.setPermissionGrantState(
-                                dar, app!!, permission!!,
+                                admin, app!!, permission!!,
                                 DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                             )
                         }
 
                         "SET_PERMISSION_DENIED" -> {
                             dpm.setPermissionGrantState(
-                                dar, app!!, permission!!,
+                                admin, app!!, permission!!,
                                 DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                             )
                         }
