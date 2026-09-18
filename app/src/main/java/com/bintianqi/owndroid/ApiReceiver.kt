@@ -39,14 +39,18 @@ class ApiReceiver : BroadcastReceiver() {
                             )
                         }
                         "DISABLE_USER_CONTROL" -> {
-                            dpm.setUserControlDisabledPackages(
-                                dar, dpm.getUserControlDisabledPackages(dar) + app
-                            )
+                            if (!delegatedAdmin) {
+                                dpm.setUserControlDisabledPackages(
+                                    dar, dpm.getUserControlDisabledPackages(dar) + app
+                                )
+                            }
                         }
                         "ENABLE_USER_CONTROL" -> {
-                            dpm.setUserControlDisabledPackages(
-                                dar, dpm.getUserControlDisabledPackages(dar).filter { it != app }
-                            )
+                            if (!delegatedAdmin) {
+                                dpm.setUserControlDisabledPackages(
+                                    dar, dpm.getUserControlDisabledPackages(dar).filter { it != app }
+                                )
+                            }
                         }
 
                         "BLOCK_UNINSTALL" -> {
