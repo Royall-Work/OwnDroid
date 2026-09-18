@@ -45,8 +45,10 @@ class MyApplication : Application() {
         try {
             ph.refreshDelegatedScopes()
             ps.value = getPrivilegeStatus(
-                ph.dpm, ph.dar, ph.dhizuku,
-                                ph.delegatedScopes
+                ph.dpm,
+                if (ph.delegatedAdmin) null else ph.dar,
+                ph.dhizuku,
+                ph.delegatedScopes
             )
         } catch (e: DhizukuException) {
             ph.refreshDelegatedScopes()
