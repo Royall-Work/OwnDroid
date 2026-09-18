@@ -18,7 +18,7 @@ class CaCertViewModel(
     val selectedCert = MutableStateFlow<CaCertInfo?>(null)
 
     fun getCaCerts() = ph.safeDpmCall {
-        installedCertsState.value = dpm.getInstalledCaCerts(dar).mapNotNull { parseCert(it) }
+        installedCertsState.value = dpm.getInstalledCaCerts(admin).mapNotNull { parseCert(it) }
     }
 
     fun selectCert(cert: CaCertInfo) {
@@ -48,18 +48,18 @@ class CaCertViewModel(
     }
 
     fun installCert() = ph.safeDpmCall {
-        val result = dpm.installCaCert(dar, selectedCert.value!!.bytes)
+        val result = dpm.installCaCert(admin, selectedCert.value!!.bytes)
         if (result) getCaCerts()
         toastChannel.sendStatus(result)
     }
 
     fun uninstallCert() = ph.safeDpmCall {
-        dpm.uninstallCaCert(dar, selectedCert.value!!.bytes)
+        dpm.uninstallCaCert(admin, selectedCert.value!!.bytes)
         getCaCerts()
     }
 
     fun uninstallAll() = ph.safeDpmCall {
-        dpm.uninstallAllUserCaCerts(dar)
+        dpm.uninstallAllUserCaCerts(admin)
         installedCertsState.value = emptyList()
     }
 
