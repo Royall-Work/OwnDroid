@@ -31,7 +31,7 @@ class MyApplication : Application() {
                         if (intent.action == DevicePolicyManager.ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED) {
                             ph.refreshDelegatedScopes()
                             ps.value = getPrivilegeStatus(
-                                ph.dpm, ph.dar, ph.dhizuku,
+                                ph.dpm, if (ph.delegatedAdmin) null else ph.dar, ph.dhizuku,
                 ph.delegatedScopes
                             )
                         }
