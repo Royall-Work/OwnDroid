@@ -51,7 +51,8 @@ class PrivilegeHelper(
         val dpm: DevicePolicyManager,
         val dar: ComponentName,
         val delegatedDar: ComponentName?,
-        val admin: ComponentName? = delegatedDar
+        val admin: ComponentName? = delegatedDar,
+        val canManageUserControlDisabledPackages: Boolean = true
     )
 
     fun refreshDelegatedScopes() {
@@ -77,7 +78,10 @@ class PrivilegeHelper(
 
     fun safeDpmCall(block: SafeDpmCallScope.() -> Unit) {
         try {
-            SafeDpmCallScope(dpm, dar, delegatedDar).block()
+            SafeDpmCallScope(
+                dpm, dar, delegatedDar, canManageUserControlDisabledPackages =
+                    canManageUserControlDisabledPackages
+            ).block()
         } catch (e: DhizukuException) {
             dhizukuError.value = e.reason
         }
