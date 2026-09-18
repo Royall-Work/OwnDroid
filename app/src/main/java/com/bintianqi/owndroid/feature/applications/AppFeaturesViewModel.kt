@@ -40,7 +40,7 @@ class AppFeaturesViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
                 val packages = pm.getInstalledApplications(getInstalledAppsFlags).filter {
-                    dpm.isPackageSuspended(dar, it.packageName)
+                    dpm.isPackageSuspended(admin, it.packageName)
                 }
                 suspendedPackages.value = packages.map { it.packageName }
             }
@@ -49,7 +49,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(24)
     fun setPackageSuspended(packages: List<String>, status: Boolean) = ph.safeDpmCall {
-        val failedPackages = dpm.setPackagesSuspended(dar, packages.toTypedArray(), status)
+        val failedPackages = dpm.setPackagesSuspended(admin, packages.toTypedArray(), status)
         suspendedPackages.update { list ->
             list.plusOrMinus(status, packages.filter { it !in failedPackages })
         }
@@ -60,7 +60,7 @@ class AppFeaturesViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
                 hiddenPackages.value = pm.getInstalledApplications(getInstalledAppsFlags).filter {
-                    dpm.isApplicationHidden(dar, it.packageName)
+                    dpm.isApplicationHidden(admin, it.packageName)
                 }.map { it.packageName }
             }
         }
@@ -68,7 +68,7 @@ class AppFeaturesViewModel(
 
     fun setPackageHidden(packages: List<String>, status: Boolean) = ph.safeDpmCall {
         for (name in packages) {
-            val result = dpm.setApplicationHidden(dar, name, status)
+            val result = dpm.setApplicationHidden(admin, name, status)
             if (result) hiddenPackages.update { it.plusOrMinus(status, name) }
         }
     }
@@ -79,7 +79,7 @@ class AppFeaturesViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
                 ubPackages.value = pm.getInstalledApplications(getInstalledAppsFlags).filter {
-                    dpm.isUninstallBlocked(dar, it.packageName)
+                    dpm.isUninstallBlocked(admin, it.packageName)
                 }.map { it.packageName }
             }
         }
@@ -89,8 +89,8 @@ class AppFeaturesViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
                 for (name in packages) {
-                    dpm.setUninstallBlocked(dar, name, status)
-                    val succeed = dpm.isUninstallBlocked(dar, name) == status
+                    dpm.setUninstallBlocked(admin, name, status)
+                    val succeed = dpm.isUninstallBlocked(admin, name) == status
                     if (succeed) ubPackages.update { it.plusOrMinus(status, name) }
                 }
             }
@@ -102,7 +102,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(30)
     fun getUcdPackages() = ph.safeDpmCall {
-        ucdPackages.value = dpm.getUserControlDisabledPackages(dar).distinct()
+        ucdPackages.value = dpm.getUserControlDisabledPackages(admin).distinct()
     }
 
     @RequiresApi(30)
@@ -168,7 +168,7 @@ class AppFeaturesViewModel(
                     val state = async(Dispatchers.IO) {
                         var result = DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
                         ph.safeDpmCall {
-                            result = dpm.getPermissionGrantState(dar, app.packageName, perm.id)
+                            result = dpm.getPermissionGrantState(admin, app.packageName, perm.id)
                         }
                         return@async result
                     }
@@ -207,7 +207,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun clearStorage(packageName: String, callback: () -> Unit) = ph.safeDpmCall {
-        dpm.clearApplicationUserData(dar, packageName, application.mainExecutor) { _, result ->
+        dpm.clearApplicationUserData(admin, packageName, application.mainExecutor) { _, result ->
             callback()
             toastChannel.sendStatus(result)
         }
@@ -222,7 +222,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun getMddPackages() = ph.safeDpmCall {
-        mddPackages.value = dpm.getMeteredDataDisabledPackages(dar).distinct()
+        mddPackages.value = dpm.getMeteredDataDisabledPackages(admin).distinct()
     }
 
     @RequiresApi(28)
@@ -238,7 +238,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun getKuPackages() = ph.safeDpmCall {
-        kuPackages.value = dpm.getKeepUninstalledPackages(dar)?.distinct() ?: emptyList()
+        kuPackages.value = dpm.getKeepUninstalledPackages(admin)?.distinct() ?: emptyList()
     }
 
     @RequiresApi(28)
@@ -254,7 +254,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(30)
     fun getCpPackages() = ph.safeDpmCall {
-        cpPackages.value = dpm.getCrossProfilePackages(dar).toList()
+        cpPackages.value = dpm.getCrossProfilePackages(admin).toList()
     }
 
     @RequiresApi(30)
@@ -269,15 +269,15 @@ class AppFeaturesViewModel(
     // Cross-profile widget providers
     val cpwProviders = MutableStateFlow(emptyList<String>())
     fun getCpwProviders() = ph.safeDpmCall {
-        cpwProviders.value = dpm.getCrossProfileWidgetProviders(dar).distinct()
+        cpwProviders.value = dpm.getCrossProfileWidgetProviders(admin).distinct()
     }
 
     fun setCpwProvider(packages: List<String>, status: Boolean) = ph.safeDpmCall {
         for (name in packages) {
             if (status) {
-                dpm.addCrossProfileWidgetProvider(dar, name)
+                dpm.addCrossProfileWidgetProvider(admin, name)
             } else {
-                dpm.removeCrossProfileWidgetProvider(dar, name)
+                dpm.removeCrossProfileWidgetProvider(admin, name)
             }
         }
         getCpwProviders()
@@ -285,7 +285,7 @@ class AppFeaturesViewModel(
 
     @RequiresApi(28)
     fun installExistingApp(name: String) = ph.safeDpmCall {
-        val result = dpm.installExistingPackage(dar, name)
+        val result = dpm.installExistingPackage(admin, name)
         toastChannel.sendStatus(result)
     }
 
@@ -336,7 +336,7 @@ class AppFeaturesViewModel(
     val pimPackages = MutableStateFlow(emptyList<AppInfo>())
 
     fun getPimPolicy() = ph.safeDpmCall {
-        val packages = dpm.getPermittedInputMethods(dar)
+        val packages = dpm.getPermittedInputMethods(admin)
         pimAllowAll.value = packages == null
         if (packages != null) pimPackages.value = packages.distinct().map { getAppInfo(pm, it) }
     }
@@ -363,7 +363,7 @@ class AppFeaturesViewModel(
     val pasAllowAll = MutableStateFlow(true)
     val pasPackages = MutableStateFlow(emptyList<AppInfo>())
     fun getPasPolicy() = ph.safeDpmCall {
-        val packages = dpm.getPermittedAccessibilityServices(dar)
+        val packages = dpm.getPermittedAccessibilityServices(admin)
         pasAllowAll.value = packages == null
         if (packages != null) pasPackages.value = packages.distinct().map { getAppInfo(pm, it) }
     }
@@ -387,7 +387,7 @@ class AppFeaturesViewModel(
     }
 
     fun enableSystemApp(name: String) = ph.safeDpmCall {
-        dpm.enableSystemApp(dar, name)
+        dpm.enableSystemApp(admin, name)
     }
 
     @RequiresApi(34)
