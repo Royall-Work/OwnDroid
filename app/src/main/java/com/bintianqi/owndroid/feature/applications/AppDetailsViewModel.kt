@@ -58,8 +58,10 @@ class AppDetailsViewModel(
             if (VERSION.SDK_INT >= 24) dpm.isPackageSuspended(admin, packageName) else false,
             dpm.isApplicationHidden(admin, packageName),
             dpm.isUninstallBlocked(admin, packageName),
-            if (VERSION.SDK_INT >= 30 && !ph.delegatedAdmin) packageName in dpm.getUserControlDisabledPackages(dar)
-            else false,
+            if (VERSION.SDK_INT >= 30 && ph.canManageUserControlDisabledPackages) {
+                val adminForUcd = if (ph.delegatedAdmin) null else dar
+                packageName in dpm.getUserControlDisabledPackages(adminForUcd)
+            } else false,
             if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(dar)
             else false,
             if (VERSION.SDK_INT >= 28 && privilegeState.value.device)
@@ -78,8 +80,8 @@ class AppDetailsViewModel(
     }
 
     fun setHidden(status: Boolean) = ph.safeDpmCall {
-        val userControlPackages = if (VERSION.SDK_INT >= 30 && !ph.delegatedAdmin)
-            dpm.getUserControlDisabledPackages(dar) else emptyList()
+        val userControlPackages = if (VERSION.SDK_INT >= 30 && ph.canManageUserControlDisabledPackages)
+            dpm.getUserControlDisabledPackages(if (ph.delegatedAdmin) null else dar) else emptyList()
         val meteredPackages = if (VERSION.SDK_INT >= 28 && !ph.delegatedAdmin)
             dpm.getMeteredDataDisabledPackages(dar) else emptyList()
 
@@ -127,10 +129,11 @@ class AppDetailsViewModel(
     fun setUserControlDisabled(state: Boolean) = ph.safeDpmCall {
         dpm.setUserControlDisabledPackages(
             dar,
-            dpm.getUserControlDisabledPackages(dar).plusOrMinus(state, packageName)
+            dpm.getUserControlDisabledPackages(if (ph.delegatedAdmin) null else dar)
+                .plusOrMinus(state, packageName)
         )
         uiState.update {
-            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(admin))
+            it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(if (ph.delegatedAdmin) null else dar))
         }
     }
 
