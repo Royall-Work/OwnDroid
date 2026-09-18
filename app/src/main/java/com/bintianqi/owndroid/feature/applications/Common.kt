@@ -333,10 +333,10 @@ fun getAppStatus(
             }
             hidden = dpm.isApplicationHidden(admin, packageName)
             ub = dpm.isUninstallBlocked(admin, packageName)
-            if (Build.VERSION.SDK_INT >= 30) {
-                ucd = packageName in dpm.getUserControlDisabledPackages(admin)
+            if (Build.VERSION.SDK_INT >= 30 && !ph.delegatedAdmin) {
+                ucd = packageName in dpm.getUserControlDisabledPackages(dar)
             }
-            if (Build.VERSION.SDK_INT >= 28) {
+            if (Build.VERSION.SDK_INT >= 28 && !ph.delegatedAdmin) {
                 mdd = packageName in dpm.getMeteredDataDisabledPackages(dar)
             }
         }
