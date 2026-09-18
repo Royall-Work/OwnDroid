@@ -31,7 +31,7 @@ class ManagedConfigurationViewModel(
         try {
             val rm = application.getSystemService(RestrictionsManager::class.java)
             ph.safeDpmCall {
-                val bundle = dpm.getApplicationRestrictions(dar, packageName)
+                val bundle = dpm.getApplicationRestrictions(admin, packageName)
                 val entries = rm.getManifestRestrictions(packageName)
                 if (entries != null) {
                     restrictionsState.value = transformAppRestrictionEntryList(entries, bundle)
@@ -48,7 +48,7 @@ class ManagedConfigurationViewModel(
                 val bundle = transformAppRestriction(
                     restrictionsState.value.filter { it.key != item.key }.plus(item)
                 )
-                dpm.setApplicationRestrictions(dar, packageName, bundle)
+                dpm.setApplicationRestrictions(admin, packageName, bundle)
                 getRestrictionsWithoutCoroutine()
             }
         }
@@ -57,7 +57,7 @@ class ManagedConfigurationViewModel(
     fun clearRestrictions() {
         viewModelScope.launch(Dispatchers.IO) {
             ph.safeDpmCall {
-                dpm.setApplicationRestrictions(dar, packageName, Bundle())
+                dpm.setApplicationRestrictions(admin, packageName, Bundle())
             }
             getRestrictionsWithoutCoroutine()
         }
@@ -116,7 +116,7 @@ class ManagedConfigurationViewModel(
                 }
                 val bundle = transformAppRestriction(restrictionsState.value)
                 ph.safeDpmCall {
-                    dpm.setApplicationRestrictions(dar, packageName, bundle)
+                    dpm.setApplicationRestrictions(admin, packageName, bundle)
                 }
                 getRestrictionsWithoutCoroutine()
                 toastChannel.sendStatus(true)
