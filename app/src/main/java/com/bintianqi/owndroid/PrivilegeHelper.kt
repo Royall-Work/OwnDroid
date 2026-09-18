@@ -44,7 +44,8 @@ class PrivilegeHelper(
     class SafeDpmCallScope(
         val dpm: DevicePolicyManager,
         val dar: ComponentName,
-        val delegatedDar: ComponentName?
+        val delegatedDar: ComponentName?,
+        val admin: ComponentName? = delegatedDar
     )
 
     fun refreshDelegatedScopes() {
