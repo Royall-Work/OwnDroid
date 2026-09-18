@@ -102,18 +102,20 @@ class AppFeaturesViewModel(
 
     @RequiresApi(30)
     fun getUcdPackages() = ph.safeDpmCall {
-        if (ph.delegatedAdmin) {
+        if (!ph.canManageUserControlDisabledPackages) {
             ucdPackages.value = emptyList()
             return@safeDpmCall
         }
-        ucdPackages.value = dpm.getUserControlDisabledPackages(dar).distinct()
+        ucdPackages.value = dpm.getUserControlDisabledPackages(
+            if (ph.delegatedAdmin) null else dar
+        ).distinct()
     }
 
     @RequiresApi(30)
     fun setPackageUcd(packages: List<String>, status: Boolean) = ph.safeDpmCall {
-        if (ph.delegatedAdmin) return@safeDpmCall
+        if (!ph.canManageUserControlDisabledPackages) return@safeDpmCall
         dpm.setUserControlDisabledPackages(
-            dar,
+            if (ph.delegatedAdmin) null else dar,
             ucdPackages.value.plusOrMinus(status, packages)
         )
         getUcdPackages()
