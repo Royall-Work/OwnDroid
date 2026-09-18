@@ -21,12 +21,12 @@ class SecurityLoggingViewModel(
 
     @RequiresApi(24)
     fun getEnabled() = ph.safeDpmCall {
-        enabledState.value = dpm.isSecurityLoggingEnabled(dar)
+        enabledState.value = dpm.isSecurityLoggingEnabled(admin)
     }
 
     @RequiresApi(24)
     fun setEnabled(enabled: Boolean) = ph.safeDpmCall {
-        dpm.setSecurityLoggingEnabled(dar, enabled)
+        dpm.setSecurityLoggingEnabled(admin, enabled)
         enabledState.value = enabled
     }
 
