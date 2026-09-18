@@ -29,7 +29,7 @@ class PrivilegeHelper(
         get() = !dhizuku && _delegatedScopes.isNotEmpty() && !isOwnAdmin()
 
     val delegatedDar: ComponentName?
-        get() = if (delegatedAdmin) null else myDar
+        get() = if (delegatedAdmin) null else dar
 
     val dpm: DevicePolicyManager
         get() {
