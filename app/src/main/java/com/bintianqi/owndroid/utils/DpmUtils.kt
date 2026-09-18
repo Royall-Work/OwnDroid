@@ -175,7 +175,7 @@ fun handlePrivilegeChange(
 }
 
 fun doUserOperationWithContext(
-    context: Context, dpm: DevicePolicyManager, dar: ComponentName?,
+    context: Context, dpm: DevicePolicyManager, dar: ComponentName,
     type: UserOperationType, id: Int, isUserId: Boolean
 ): Boolean {
     val um = context.getSystemService(Context.USER_SERVICE) as UserManager
