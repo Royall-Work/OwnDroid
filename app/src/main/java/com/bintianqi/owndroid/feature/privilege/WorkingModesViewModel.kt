@@ -36,7 +36,7 @@ class WorkingModesViewModel(
     fun getPrivilegeState() = ph.safeDpmCall {
         ph.refreshDelegatedScopes()
         ps.value = getPrivilegeStatus(
-            dpm, dar, ph.dhizuku,
+            dpm, if (ph.delegatedAdmin) null else dar, ph.dhizuku,
             ph.delegatedScopes
         )
     }
