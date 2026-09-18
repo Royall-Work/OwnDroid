@@ -58,7 +58,7 @@ class AppDetailsViewModel(
             if (VERSION.SDK_INT >= 24) dpm.isPackageSuspended(admin, packageName) else false,
             dpm.isApplicationHidden(admin, packageName),
             dpm.isUninstallBlocked(admin, packageName),
-            if (VERSION.SDK_INT >= 30) packageName in dpm.getUserControlDisabledPackages(admin)
+            if (VERSION.SDK_INT >= 30 && !ph.delegatedAdmin) packageName in dpm.getUserControlDisabledPackages(dar)
             else false,
             if (VERSION.SDK_INT >= 28) packageName in dpm.getMeteredDataDisabledPackages(dar)
             else false,
@@ -78,9 +78,9 @@ class AppDetailsViewModel(
     }
 
     fun setHidden(status: Boolean) = ph.safeDpmCall {
-        val userControlPackages = if (VERSION.SDK_INT >= 30)
-            dpm.getUserControlDisabledPackages(admin) else emptyList()
-        val meteredPackages = if (VERSION.SDK_INT >= 28)
+        val userControlPackages = if (VERSION.SDK_INT >= 30 && !ph.delegatedAdmin)
+            dpm.getUserControlDisabledPackages(dar) else emptyList()
+        val meteredPackages = if (VERSION.SDK_INT >= 28 && !ph.delegatedAdmin)
             dpm.getMeteredDataDisabledPackages(dar) else emptyList()
 
         if (status) {
@@ -127,7 +127,7 @@ class AppDetailsViewModel(
     fun setUserControlDisabled(state: Boolean) = ph.safeDpmCall {
         dpm.setUserControlDisabledPackages(
             dar,
-            dpm.getUserControlDisabledPackages(admin).plusOrMinus(state, packageName)
+            dpm.getUserControlDisabledPackages(dar).plusOrMinus(state, packageName)
         )
         uiState.update {
             it.copy(userControlDisabled = packageName in dpm.getUserControlDisabledPackages(admin))
