@@ -28,19 +28,24 @@ class PrivilegeHelper(
     val delegatedAdmin: Boolean
         get() = !dhizuku && _delegatedScopes.isNotEmpty() && !isOwnAdmin()
 
+    val delegatedDar: ComponentName?
+        get() = if (delegatedAdmin) null else myDar
+
     val dpm: DevicePolicyManager
         get() {
             return if (dhizuku) getDhizukuDpm() else myDpm
         }
 
-    val dar: ComponentName?
+    val dar: ComponentName
         get() {
-            return if (dhizuku) Dhizuku.getOwnerComponent()
-            else if (delegatedAdmin) null
-            else myDar
+            return if (dhizuku) Dhizuku.getOwnerComponent() else myDar
         }
 
-    class SafeDpmCallScope(val dpm: DevicePolicyManager, val dar: ComponentName?)
+    class SafeDpmCallScope(
+        val dpm: DevicePolicyManager,
+        val dar: ComponentName,
+        val delegatedDar: ComponentName?
+    )
 
     fun refreshDelegatedScopes() {
         _delegatedScopes = if (
@@ -65,7 +70,7 @@ class PrivilegeHelper(
 
     fun safeDpmCall(block: SafeDpmCallScope.() -> Unit) {
         try {
-            SafeDpmCallScope(dpm, dar).block()
+            SafeDpmCallScope(dpm, dar, delegatedDar).block()
         } catch (e: DhizukuException) {
             dhizukuError.value = e.reason
         }
