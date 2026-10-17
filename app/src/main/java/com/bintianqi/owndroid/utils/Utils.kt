@@ -51,7 +51,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.UUID
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -229,14 +229,13 @@ fun <T>List<T>.plusOrMinus(state: Boolean, items: Collection<T>) =
     if (state) plus(items) else minus(items)
 
 private const val PACKAGE_UNINSTALLED_ACTION = "com.bintianqi.owndroid.action.PACKAGE_UNINSTALLED"
-private val uninstallRequestSequence = AtomicInteger(0)
-
 fun uninstallPackage(
     application: MyApplication, privilegeHelper: PrivilegeHelper,
     packageName: String, onComplete: (String?) -> Unit
 ) {
-    val requestId = uninstallRequestSequence.incrementAndGet()
-    val action = "$PACKAGE_UNINSTALLED_ACTION.$requestId"
+    val requestToken = UUID.randomUUID().toString()
+    val requestId = requestToken.hashCode()
+    val action = "$PACKAGE_UNINSTALLED_ACTION.$requestToken"
     var callbackPendingIntent: PendingIntent? = null
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
