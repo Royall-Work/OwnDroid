@@ -154,6 +154,16 @@ fun myEntryProvider(
         }
     }
 
+    fun onApplicationUninstalled(packageName: String) {
+        appChooserVm.onPackageRemoved(packageName)
+        val parent = backstack.getOrNull(backstack.lastIndex - 1)
+        if (parent is Destination.ApplicationsList && parent.mode == AppChooserMode.ListView) {
+            backstack.removeLastOrNull()
+        } else {
+            navigateAndPopAll(Destination.ApplicationsList(AppChooserMode.ListView))
+        }
+    }
+
     fun choosePackage() {
         navigate(Destination.ApplicationsList(AppChooserMode.Choose))
     }
@@ -436,7 +446,7 @@ fun myEntryProvider(
                         container.privilegeState, container.toastChannel
                     )
                 }
-            ), ::navigateUp, ::navigate
+            ), ::navigateUp, ::navigate, ::onApplicationUninstalled
         )
     }
     myEntry<Destination.Suspend>(
@@ -529,7 +539,8 @@ fun myEntryProvider(
     ) {
         val vm = viewModel<AppFeaturesViewModel>()
         UninstallAppScreen(
-            vm, container.chosenPackage, ::chooseSinglePackage, ::navigateUp
+            vm, container.chosenPackage, ::chooseSinglePackage, ::navigateUp,
+            appChooserVm::onPackageRemoved
         )
     }
     myEntry<Destination.KeepUninstalledPackages>(

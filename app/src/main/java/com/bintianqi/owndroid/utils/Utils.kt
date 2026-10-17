@@ -51,6 +51,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.concurrent.atomic.AtomicInteger
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -227,21 +228,39 @@ fun <T>List<T>.plusOrMinus(state: Boolean, item: T) = if (state) plus(item) else
 fun <T>List<T>.plusOrMinus(state: Boolean, items: Collection<T>) =
     if (state) plus(items) else minus(items)
 
+private const val PACKAGE_UNINSTALLED_ACTION = "com.bintianqi.owndroid.action.PACKAGE_UNINSTALLED"
+private val uninstallRequestSequence = AtomicInteger(0)
+
 fun uninstallPackage(
     application: MyApplication, privilegeHelper: PrivilegeHelper,
     packageName: String, onComplete: (String?) -> Unit
 ) {
-    val action = "com.bintianqi.owndroid.action.PACKAGE_UNINSTALLED"
+    val requestId = uninstallRequestSequence.incrementAndGet()
+    val action = "$PACKAGE_UNINSTALLED_ACTION.$requestId"
+    var callbackPendingIntent: PendingIntent? = null
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val statusExtra = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, 999)
             if (statusExtra == PackageInstaller.STATUS_PENDING_USER_ACTION) {
                 @SuppressWarnings("UnsafeIntentLaunch")
                 val confirmIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
-                confirmIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(confirmIntent)
+                if (confirmIntent != null) {
+                    confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(confirmIntent)
+                } else {
+                    try {
+                        context.unregisterReceiver(this)
+                    } catch (_: IllegalArgumentException) {
+                    }
+                    callbackPendingIntent?.cancel()
+                    onComplete(parsePackageInstallerMessage(context, intent))
+                }
             } else {
-                context.unregisterReceiver(this)
+                try {
+                    context.unregisterReceiver(this)
+                } catch (_: IllegalArgumentException) {
+                }
+                callbackPendingIntent?.cancel()
                 if (statusExtra == PackageInstaller.STATUS_SUCCESS) {
                     onComplete(null)
                 } else {
@@ -255,15 +274,24 @@ fun uninstallPackage(
         null, ContextCompat.RECEIVER_NOT_EXPORTED
     )
     val intent = Intent(action).setPackage(application.packageName)
-    val pi = if(VERSION.SDK_INT >= 34) {
-        PendingIntent.getBroadcast(
-            application, 0, intent,
-            PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or PendingIntent.FLAG_MUTABLE
-        ).intentSender
+    val flags = if (VERSION.SDK_INT >= 34) {
+        PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or PendingIntent.FLAG_MUTABLE
     } else {
-        PendingIntent.getBroadcast(application, 0, intent, PendingIntent.FLAG_MUTABLE).intentSender
+        PendingIntent.FLAG_MUTABLE
     }
-    application.getPackageInstaller(privilegeHelper.dhizuku).uninstall(packageName, pi)
+    val pendingIntent = PendingIntent.getBroadcast(application, requestId, intent, flags)
+    callbackPendingIntent = pendingIntent
+    try {
+        application.getPackageInstaller(privilegeHelper.dhizuku)
+            .uninstall(packageName, pendingIntent.intentSender)
+    } catch (e: Exception) {
+        try {
+            application.unregisterReceiver(receiver)
+        } catch (_: IllegalArgumentException) {
+        }
+        pendingIntent.cancel()
+        onComplete(e.message ?: e.javaClass.simpleName)
+    }
 }
 
 fun viewModelFactory(build: () -> ViewModel) =

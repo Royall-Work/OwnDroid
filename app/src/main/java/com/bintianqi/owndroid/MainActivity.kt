@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
     lateinit var appChooserVm: AppChooserViewModel
-    lateinit var packageRemoveReceiver: BroadcastReceiver
+    private var packageRemoveReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -79,6 +79,9 @@ class MainActivity : FragmentActivity() {
                 viewModelFactory { AppChooserViewModel(myApp, myApp.container.privilegeHelper) }
             }
         ).value
+        packageRemoveReceiver = registerPackageRemovedReceiver(this) {
+            appChooserVm.onPackageRemoved(it)
+        }
         if (
             myApp.container.privilegeState.value.work &&
             !settingsRepo.data.privilege.managedProfileActivated
@@ -183,16 +186,15 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        packageRemoveReceiver = registerPackageRemovedReceiver(this) {
-            appChooserVm.onPackageRemoved(it)
+    override fun onDestroy() {
+        packageRemoveReceiver?.let { receiver ->
+            try {
+                unregisterReceiver(receiver)
+            } catch (_: IllegalArgumentException) {
+            }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        unregisterReceiver(packageRemoveReceiver)
+        packageRemoveReceiver = null
+        super.onDestroy()
     }
 }
 

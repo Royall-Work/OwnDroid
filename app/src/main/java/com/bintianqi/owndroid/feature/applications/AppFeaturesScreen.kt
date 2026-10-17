@@ -387,7 +387,7 @@ fun ClearAppStorageScreen(
 @Composable
 fun UninstallAppScreen(
     vm: AppFeaturesViewModel, chosenPackage: Channel<String>, onChoosePackage: () -> Unit,
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit, onUninstallSuccess: (String) -> Unit
 ) {
     var dialog by rememberSaveable { mutableStateOf(false) }
     var packageName by rememberSaveable { mutableStateOf("") }
@@ -408,7 +408,8 @@ fun UninstallAppScreen(
     }
     if (dialog) UninstallAppDialog({
         vm.uninstallApp(packageName, it)
-    }) {
+    }) { success ->
+        if (success) onUninstallSuccess(packageName)
         packageName = ""
         dialog = false
     }

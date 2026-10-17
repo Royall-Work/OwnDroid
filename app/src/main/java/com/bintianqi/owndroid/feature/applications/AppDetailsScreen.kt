@@ -46,7 +46,8 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @Composable
 fun ApplicationDetailsScreen(
-    vm: AppDetailsViewModel, onNavigateUp: () -> Unit, onNavigate: (Destination) -> Unit
+    vm: AppDetailsViewModel, onNavigateUp: () -> Unit, onNavigate: (Destination) -> Unit,
+    onUninstallSuccess: (String) -> Unit
 ) {
     val privilege by vm.privilegeState.collectAsStateWithLifecycle()
     var dialog by rememberSaveable { mutableIntStateOf(0) } // 1: clear storage, 2: uninstall
@@ -138,7 +139,7 @@ fun ApplicationDetailsScreen(
         }) { dialog = 0 }
     if (dialog == 2) UninstallAppDialog(vm::uninstall) {
         dialog = 0
-        if (it) onNavigateUp()
+        if (it) onUninstallSuccess(vm.packageName)
     }
 }
 
