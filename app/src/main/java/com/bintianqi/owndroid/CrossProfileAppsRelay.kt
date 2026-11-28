@@ -51,10 +51,10 @@ object CrossProfileAppsRelay {
     }
 
     fun intentFilters(): List<Pair<IntentFilter, Int>> = listOf(
-        createFilter(ACTION_REQUEST_PRIMARY) to DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-        createFilter(ACTION_RESULT_TO_MANAGED) to DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT,
-        createFilter(ACTION_REQUEST_MANAGED) to DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT,
-        createFilter(ACTION_RESULT_TO_PRIMARY) to DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED
+        createFilter(ACTION_REQUEST_PRIMARY) to DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT,
+        createFilter(ACTION_RESULT_TO_MANAGED) to DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
+        createFilter(ACTION_REQUEST_MANAGED) to DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
+        createFilter(ACTION_RESULT_TO_PRIMARY) to DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT
     )
 
     private fun createFilter(action: String) = IntentFilter(action).apply {
