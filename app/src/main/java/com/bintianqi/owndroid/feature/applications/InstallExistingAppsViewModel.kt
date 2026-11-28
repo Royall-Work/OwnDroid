@@ -72,6 +72,7 @@ class InstallExistingAppsViewModel(
                     }
                 }
             } catch (e: Exception) {
+                pendingRequestId = null
                 _uiState.update {
                     it.copy(scanning = false, error = if (e is SecurityException) e.message ?: "Profile-owner permission is required."
                         else "Unable to contact user " + sourceUserId + ". Open OwnDroid once in both users 0 and 10, then retry.\n" + (e.message ?: e.javaClass.simpleName))
