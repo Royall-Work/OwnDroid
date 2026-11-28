@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <permission
+        android:name="com.bintianqi.owndroid.permission.CROSS_PROFILE_APP_RELAY"
+        android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
         tools:ignore="RequestInstallPackagesPolicy" />
@@ -49,6 +52,54 @@
                 <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
                 <action android:name="android.app.action.CHECK_POLICY_COMPLIANCE" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PrimaryAppsRequestActivity"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:permission="com.bintianqi.owndroid.permission.CROSS_PROFILE_APP_RELAY"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="com.bintianqi.owndroid.action.REQUEST_PRIMARY_APPS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ManagedAppsRequestActivity"
+            android:enabled="false"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:permission="com.bintianqi.owndroid.permission.CROSS_PROFILE_APP_RELAY"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="com.bintianqi.owndroid.action.REQUEST_MANAGED_APPS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ManagedAppsResultActivity"
+            android:enabled="false"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:permission="com.bintianqi.owndroid.permission.CROSS_PROFILE_APP_RELAY"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="com.bintianqi.owndroid.action.RESULT_TO_MANAGED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PrimaryAppsResultActivity"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:permission="com.bintianqi.owndroid.permission.CROSS_PROFILE_APP_RELAY"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="com.bintianqi.owndroid.action.RESULT_TO_PRIMARY" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

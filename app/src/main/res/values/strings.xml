@@ -446,10 +446,7 @@
     <string name="install_app">Install app</string>
     <string name="install_existing_app">Install existing app</string>
     <string name="install_existing_apps">Install from other users</string>
-    <string name="info_install_existing_apps">Find third-party apps installed in other users or retained by Android, then install them for the current user. Scanning all users requires Shizuku permission. Installation uses Device Policy Manager.</string>
-    <string name="shizuku_not_running">Start Shizuku, then refresh this screen to scan all users.</string>
-    <string name="shizuku_permission_required">OwnDroid needs Shizuku permission to read installed apps across users.</string>
-    <string name="grant_shizuku_permission">Grant Shizuku permission</string>
+    <string name="info_install_existing_apps">Find third-party apps installed in the other user or retained by Android, then install them for the current user. Uses Android cross-profile activity routing; OwnDroid must be installed in users 0 and 10.</string>
     <string name="scan_users">Scan users</string>
     <string name="scanning_users_apps">Scanning users and apps…</string>
     <string name="no_existing_apps">No eligible third-party apps were found.</string>

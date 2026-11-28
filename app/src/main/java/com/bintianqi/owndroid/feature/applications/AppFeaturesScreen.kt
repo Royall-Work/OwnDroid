@@ -2,6 +2,7 @@ package com.bintianqi.owndroid.feature.applications
 
 import android.content.Intent
 import android.os.Build.VERSION
+import android.os.Process
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -151,6 +152,13 @@ fun ApplicationsFeaturesScreen(
             ) {
                 onNavigate(Destination.InstallExistingApp)
             }
+        }
+        val currentUserId = Process.myUid() / 100000
+        if (VERSION.SDK_INT >= 28 && (
+                    (currentUserId == 0 && privilege.device) ||
+                    (currentUserId == 10 && privilege.profile && privilege.affiliated)
+                )
+        ) {
             FunctionItem(
                 R.string.install_existing_apps, icon = R.drawable.install_mobile_fill0
             ) {

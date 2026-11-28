@@ -3,6 +3,7 @@ package com.bintianqi.owndroid.feature.work_profile
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.IntentFilter
+import com.bintianqi.owndroid.CrossProfileAppsRelay
 
 object DynamicIntentFilterApplier {
     fun apply(
@@ -24,6 +25,7 @@ object DynamicIntentFilterApplier {
                 }
             }
         }
+        pending.addAll(CrossProfileAppsRelay.intentFilters())
         dpm.clearCrossProfileIntentFilters(admin)
         pending.forEach { (filter, direction) ->
             dpm.addCrossProfileIntentFilter(admin, filter, direction)

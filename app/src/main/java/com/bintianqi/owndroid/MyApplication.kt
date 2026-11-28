@@ -2,6 +2,7 @@ package com.bintianqi.owndroid
 
 import android.app.Application
 import android.os.Build.VERSION
+import android.os.Process
 import com.bintianqi.owndroid.utils.DhizukuException
 import com.bintianqi.owndroid.utils.NotificationUtils
 import com.bintianqi.owndroid.utils.getPrivilegeStatus
@@ -12,6 +13,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrossProfileAppsRelay.configureComponents(this)
         if (VERSION.SDK_INT >= 28) HiddenApiBypass.setHiddenApiExemptions("")
         container = AppContainer(this)
         val ph = container.privilegeHelper
@@ -25,6 +27,13 @@ class MyApplication : Application() {
                 ph.dhizuku = false
             } else {
                 container.dhizukuErrorState.value = e.reason
+            }
+        }
+        if (Process.myUid() / 100000 == 10 && ph.myDpm.isProfileOwnerApp(packageName)) {
+            try {
+                CrossProfileAppsRelay.ensureIntentFilters(this, ph.myDpm, ph.myDar)
+            } catch (e: Exception) {
+                android.util.Log.w("MyApplication", "Unable to initialize cross-profile app relay", e)
             }
         }
         NotificationUtils.createChannels(this)

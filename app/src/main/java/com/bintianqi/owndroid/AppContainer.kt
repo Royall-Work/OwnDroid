@@ -1,6 +1,7 @@
 package com.bintianqi.owndroid
 
 import com.bintianqi.owndroid.feature.applications.AppGroupRepository
+import com.bintianqi.owndroid.feature.applications.ExistingAppsRelayResult
 import com.bintianqi.owndroid.feature.network.NetworkLoggingRepository
 import com.bintianqi.owndroid.feature.privilege.DhizukuServerRepository
 import com.bintianqi.owndroid.feature.settings.SettingsRepository
@@ -30,6 +31,7 @@ class AppContainer(val app: MyApplication) {
     val privilegeState = MutableStateFlow(PrivilegeStatus())
     val appGroupsState = MutableStateFlow(appGroupRepo.getAppGroups())
     val chosenPackage = Channel<String>(1, BufferOverflow.DROP_LATEST)
+    val existingAppsRelayResult = MutableStateFlow<ExistingAppsRelayResult?>(null)
     val themeState = MutableStateFlow(settingsRepo.data.theme)
     val toastChannel = ToastChannel(app)
     val viewModelFactory = MyViewModelFactory(
