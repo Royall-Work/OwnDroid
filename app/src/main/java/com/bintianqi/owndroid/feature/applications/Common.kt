@@ -314,12 +314,20 @@ fun AppChooserFilterBottomSheet(
 }
 
 
+fun hasManifestRestrictions(context: Context, packageName: String): Boolean {
+    return try {
+        val rm = context.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+        !rm.getManifestRestrictions(packageName).isNullOrEmpty()
+    } catch (_: Exception) {
+        false
+    }
+}
+
 fun getAppStatus(
     context: Context, ph: PrivilegeHelper, packageName: String
 ): AppChooserEntry {
     val appInfo = getAppInfo(context.packageManager, packageName)
-    val rm = context.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
-    var hasMc = false
+    var hasMc = hasManifestRestrictions(context, packageName)
     var mcModified = false
     var suspended = false
     var hidden = false
@@ -329,8 +337,7 @@ fun getAppStatus(
     try {
         ph.safeDpmCall {
             val bundle = dpm.getApplicationRestrictions(dar, packageName)
-            val entries = rm.getManifestRestrictions(packageName)
-            hasMc = !entries.isNullOrEmpty() || bundle.size() > 0
+            hasMc = hasMc || bundle.size() > 0
             mcModified = bundle.size() > 0
         }
     } catch (_: Exception) {}
