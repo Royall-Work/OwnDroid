@@ -151,6 +151,11 @@ fun ApplicationsFeaturesScreen(
             ) {
                 onNavigate(Destination.InstallExistingApp)
             }
+            FunctionItem(
+                R.string.install_existing_apps, icon = R.drawable.install_mobile_fill0
+            ) {
+                onNavigate(Destination.InstallExistingAppsFromUsers)
+            }
         }
         if (VERSION.SDK_INT >= 30 && privilege.work) {
             FunctionItem(R.string.cross_profile_apps, icon = R.drawable.work_fill0) {

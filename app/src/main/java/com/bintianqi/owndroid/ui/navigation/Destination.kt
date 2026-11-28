@@ -77,6 +77,7 @@ sealed class Destination : NavKey {
     @Serializable object UninstallApp : Destination()
     @Serializable object KeepUninstalledPackages : Destination()
     @Serializable object InstallExistingApp : Destination()
+    @Serializable object InstallExistingAppsFromUsers : Destination()
     @Serializable object CrossProfilePackages : Destination()
     @Serializable object CrossProfileWidgetProviders : Destination()
     @Serializable object CredentialManagerPolicy : Destination()

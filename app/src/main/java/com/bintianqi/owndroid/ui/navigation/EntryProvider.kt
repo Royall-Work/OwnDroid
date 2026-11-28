@@ -26,6 +26,8 @@ import com.bintianqi.owndroid.feature.applications.CredentialManagerPolicyScreen
 import com.bintianqi.owndroid.feature.applications.EditAppGroupScreen
 import com.bintianqi.owndroid.feature.applications.EnableSystemAppScreen
 import com.bintianqi.owndroid.feature.applications.InstallExistingAppScreen
+import com.bintianqi.owndroid.feature.applications.InstallExistingAppsFromUsersScreen
+import com.bintianqi.owndroid.feature.applications.InstallExistingAppsViewModel
 import com.bintianqi.owndroid.feature.applications.ManagedConfigurationBooleanEditorScreen
 import com.bintianqi.owndroid.feature.applications.ManagedConfigurationListEditorScreen
 import com.bintianqi.owndroid.feature.applications.ManagedConfigurationScreen
@@ -550,6 +552,15 @@ fun myEntryProvider(
         val vm = viewModel<AppFeaturesViewModel>()
         InstallExistingAppScreen(
             vm, container.chosenPackage, ::chooseSinglePackage, ::navigateUp
+        )
+    }
+    myEntry<Destination.InstallExistingAppsFromUsers>(
+        metadata = navParentKey<Destination.ApplicationFeatures>()
+    ) {
+        InstallExistingAppsFromUsersScreen(
+            viewModel(factory = viewModelFactory {
+                InstallExistingAppsViewModel(container.app, container.privilegeHelper)
+            }), ::navigateUp
         )
     }
     myEntry<Destination.CrossProfilePackages>(
