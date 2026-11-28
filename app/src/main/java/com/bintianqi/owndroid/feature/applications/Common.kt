@@ -316,8 +316,10 @@ fun AppChooserFilterBottomSheet(
 
 fun hasManifestRestrictions(context: Context, packageName: String): Boolean {
     return try {
-        val rm = context.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
-        !rm.getManifestRestrictions(packageName).isNullOrEmpty()
+        val restrictionsManager =
+            context.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager
+        val manifestRestrictions = restrictionsManager.getManifestRestrictions(packageName)
+        manifestRestrictions != null && manifestRestrictions.isNotEmpty()
     } catch (_: Exception) {
         false
     }
