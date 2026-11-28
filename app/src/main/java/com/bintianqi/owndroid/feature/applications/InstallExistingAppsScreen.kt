@@ -9,16 +9,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -40,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bintianqi.owndroid.R
@@ -47,6 +47,7 @@ import com.bintianqi.owndroid.ui.NavIcon
 import com.bintianqi.owndroid.utils.adaptiveInsets
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstallExistingAppsFromUsersScreen(vm: InstallExistingAppsViewModel, onNavigateUp: () -> Unit) {
     val state by vm.uiState.collectAsStateWithLifecycle()
@@ -108,7 +109,7 @@ fun InstallExistingAppsFromUsersScreen(vm: InstallExistingAppsViewModel, onNavig
             items(filteredApps, key = { it.packageName }) { app ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Checkbox(checked = app.packageName in state.selected, onCheckedChange = { vm.toggleSelection(app.packageName) }, enabled = app.packageName !in state.installing)
-                    if (app.icon != null) Image(rememberDrawablePainter(app.icon), null, Modifier.size(38.dp)) else Icon(Icons.Default.Apps, null, Modifier.size(38.dp))
+                    if (app.icon != null) Image(rememberDrawablePainter(app.icon), null, Modifier.size(38.dp)) else Icon(painterResource(R.drawable.apps_fill0), null, Modifier.size(38.dp))
                     Column(Modifier.weight(1f)) {
                         Text(app.label, style = MaterialTheme.typography.titleSmall)
                         Text(app.packageName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
