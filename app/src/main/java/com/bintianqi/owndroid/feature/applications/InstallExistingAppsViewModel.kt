@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -27,7 +28,10 @@ class InstallExistingAppsViewModel(
     init {
         viewModelScope.launch {
             application.container.existingAppsRelayResult.collect { result ->
-                if (result != null && result.requestId == pendingRequestId) acceptRelayResult(result)
+                if (result != null && result.requestId == pendingRequestId) {
+                    pendingRequestId = null
+                    acceptRelayResult(result)
+                }
             }
         }
     }
@@ -57,6 +61,16 @@ class InstallExistingAppsViewModel(
                     CrossProfileAppsRelay.ensureIntentFilters(application, ph.myDpm, ph.myDar)
                 }
                 application.startActivity(CrossProfileAppsRelay.createRequestIntent(application, currentUserId, requestId))
+                delay(15000)
+                if (pendingRequestId == requestId) {
+                    pendingRequestId = null
+                    _uiState.update {
+                        it.copy(
+                            scanning = false,
+                            error = "No response from user " + sourceUserId + ". Open OwnDroid in both users 0 and 10 and verify the managed profile is active."
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(scanning = false, error = if (e is SecurityException) e.message ?: "Profile-owner permission is required."
