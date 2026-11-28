@@ -53,7 +53,6 @@ class InstallExistingAppsViewModel(
                     error = if (granted) null else application.getString(com.bintianqi.owndroid.R.string.permission_denied)
                 )
             }
-            if (granted) scan()
         }
     }
 
